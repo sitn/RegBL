@@ -44,7 +44,7 @@ Les listes complétées seront déposées dans `regbl_toolbox\extension\traiteme
 (venv): python main.py
 ```
 
-## Pour générer les fichiers feedback des communes
+## Pour générer des fichiers KML
 Déposer les listes excel dans `\regbl_toolbox\extension\kml_generator\input`
 
 Les fichiers KML seront déposées dans `regbl_toolbox\extension\kml_generator\output`
@@ -52,7 +52,7 @@ Les fichiers KML seront déposées dans `regbl_toolbox\extension\kml_generator\o
 (venv): cd ./extension/kml_generator
 (venv): python main.py
 ```
-## Pour générer les fichiers feedback des communes
+## Pour générer les fichiers KML des rapports des communes
 Déposer les listes excel dans `\regbl_toolbox\extension\analyse_rapport\rapports`
 
 Les fichiers KML seront déposées dans le même dossier.

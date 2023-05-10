@@ -34,3 +34,29 @@ Dans un terminal avec l'environnement virtuel activé:
 (venv): cd ./apurement/feedback_communes
 (venv): python main.py
 ```
+
+## Pour compléter les listes d'extension des communes
+Déposer les listes excel dans `\regbl_toolbox\extension\traitement_communes\input`
+
+Les listes complétées seront déposées dans `regbl_toolbox\extension\traitement_communes\output`
+```
+(venv): cd ./extension/traitement_communes
+(venv): python main.py
+```
+
+## Pour générer les fichiers feedback des communes
+Déposer les listes excel dans `\regbl_toolbox\extension\kml_generator\input`
+
+Les fichiers KML seront déposées dans `regbl_toolbox\extension\kml_generator\output`
+```
+(venv): cd ./extension/kml_generator
+(venv): python main.py
+```
+## Pour générer les fichiers feedback des communes
+Déposer les listes excel dans `\regbl_toolbox\extension\analyse_rapport\rapports`
+
+Les fichiers KML seront déposées dans le même dossier.
+```
+(venv): cd ./extension/analyse_rapport
+(venv): python main.py
+```

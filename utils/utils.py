@@ -3,7 +3,8 @@ from datetime import datetime
 import requests
 import os
 import shutil
-
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 
 def _findRowIndex(ws, searchTerm, column_id=1, limit=1e3):
@@ -79,7 +80,7 @@ def loadCommunesOFS():
 
     i = 0
     while i < 1e4:
-        i += 1 
+        i += 1
         
         if ws_source.cell(i,1).value is None:
             break
@@ -96,7 +97,7 @@ def downloadListeCantonNeuchatel(path=None):
     if path is None or not os.path.exists(path):
         path = os.environ['FEEDBACK_COMMUNES_WORKING_DIR']
 
-    r = requests.get(os.environ['FEEDBACK_COMMUNES_URL_FEEBDACK_CANTON'], allow_redirects=True)
+    r = requests.get(os.environ['STATIC_URL_FEEBDACK_CANTON'], allow_redirects=True)
 
     filename = datetime.strftime(datetime.now(), '%Y%M%d_Listes_NE.xlsx')
 
@@ -213,7 +214,6 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                             coord_e = ws.cell(current_line_idx,16).value
                             coord_n = ws.cell(current_line_idx,17).value
                         if i==4:
-                            print(ws.cell(current_line_idx,9).value)
                             (coord_e, coord_n) = ws.cell(current_line_idx,9).value.split(' ')
                         if i==5:
                             (coord_e, coord_n) = ws.cell(current_line_idx,9).value.split(' ')
@@ -246,3 +246,18 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
         wb.save(feedback_commune_filepath)
 
         return (feedback_commune_filepath, feedback_commune)
+
+
+def createDBSession(env_substring):
+    engine = create_engine("postgresql+psycopg2://{}:{}@{}:{}/{}".format(
+        os.environ[env_substring + '_USERNAME'],
+        os.environ[env_substring + '_PASSWORD'],
+        os.environ[env_substring + '_HOST'],
+        os.environ[env_substring + '_PORT'],
+        os.environ[env_substring + '_DATABASE']
+    ))
+
+    # create session
+    Session = sessionmaker()
+    Session.configure(bind=engine)
+    return Session()

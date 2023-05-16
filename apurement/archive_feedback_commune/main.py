@@ -18,7 +18,6 @@ files = os.listdir(source_path)
 for f in files:
     if not f.endswith('.xlsx'):
         continue
-    print(f)
 
     file_path = os.path.join(source_path, f)
 

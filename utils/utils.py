@@ -214,7 +214,6 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                             coord_e = ws.cell(current_line_idx,16).value
                             coord_n = ws.cell(current_line_idx,17).value
                         if i==4:
-                            print(ws.cell(current_line_idx,9).value)
                             (coord_e, coord_n) = ws.cell(current_line_idx,9).value.split(' ')
                         if i==5:
                             (coord_e, coord_n) = ws.cell(current_line_idx,9).value.split(' ')

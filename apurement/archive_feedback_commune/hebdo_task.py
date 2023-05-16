@@ -3,7 +3,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from models import RegBLApurementFeedbackHebdoCommunes
-
+import time
 load_dotenv(r'..\..\.env')
 
 sys.path.insert(0, r'..\..\utils')
@@ -12,37 +12,31 @@ import utils
 
 session = utils.createDBSession('ARCHIVE_FEEDBACK_COMMUNES_DB')
 
-# lire le fichier excel
-source_path = os.environ['ARCHIVE_FEEDBACK_COMMUNES_EXCEL_PATH']
-files = os.listdir(source_path)
-for f in files:
-    if not f.endswith('.xlsx'):
-        continue
-    print(f)
 
-    file_path = os.path.join(source_path, f)
+# download excel list
+source_path = os.environ['ARCHIVE_FEEDBACK_COMMUNES_TMP_PATH']
+[os.remove(os.path.join(source_path, file)) if file != '.gitkeep' else None for file in os.listdir(source_path)]
+file_path = utils.downloadListeCantonNeuchatel(path=source_path) 
 
-    wb = load_workbook(file_path)
-    ws = wb['Communes']
+wb = load_workbook(file_path)
+ws = wb['Communes']
 
 
-    # get date and check if it already exists in database (if yes: skip this file)
-    date = ws.cell(1,2).value.replace('Etat: ', '').split('.')
-    date = '-'.join(date[::-1]) if len(date) == 3 else None
+# get date and check if it already exists in database (if yes: skip this file)
+date = ws.cell(1,2).value.replace('Etat: ', '').split('.')
+date = '-'.join(date[::-1]) if len(date) == 3 else None
 
-    test = session.query(
-        RegBLApurementFeedbackHebdoCommunes
-    ).filter(
-        RegBLApurementFeedbackHebdoCommunes.date_version == date
-    ).all()
-
-    if len(test) > 0:
-        continue
+test = session.query(
+    RegBLApurementFeedbackHebdoCommunes
+).filter(
+    RegBLApurementFeedbackHebdoCommunes.date_version == date
+).all()
 
 
+if len(test) == 0:
     line_i = utils._findRowIndex(ws, 'Canton', column_id=2)
     line_i += 2
-    
+
     while ws.cell(line_i, 2).value == 'NE':
         data = None
         data = RegBLApurementFeedbackHebdoCommunes()
@@ -80,4 +74,7 @@ for f in files:
         line_i += 1
 
 
-session.commit()
+    session.commit()
+
+
+os.remove(file_path)

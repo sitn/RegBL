@@ -123,3 +123,11 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# input and ouput folders
+*output/
+*input/
+
+# excel files
+*.xlsx
+*.xls

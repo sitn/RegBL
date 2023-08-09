@@ -8,11 +8,11 @@
 22 (Pas encore rencontré)
 23 (Pas encore rencontré)
 24 (Pas encore rencontré)
-31 Ne rien faire
+31 Bâtiment projeté? => Ne rien faire / Bâtiment démoli? Supprimer l'EGID
 32 Ajouter les coordonnées du bâtiment dans le RegBL
 33 Bâtiment projeté, ne rien faire
 34 (Pas encore rencontré)
-35 (Pas encore rencontré)
+35 EGID à réunir
 41 Corriger le statut du bâtiment (GSTAT) en fonction de celui de la MO
 42 L'erreur peut provenir de deux sources, les coordonnées du bâtiment sont fausses (à corriger) ou la catégorie du bâtiment (GKAT) est fausse (à corriger)
 43 Contrôler la catégorie du bâtiment (GKAT), déclaré comme temporaire

@@ -124,5 +124,10 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-#ouput folders
+# input and ouput folders
 *output/
+*input/
+
+# excel files
+*.xlsx
+*.xls

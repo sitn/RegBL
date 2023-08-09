@@ -46,6 +46,9 @@ if __name__ == '__main__':
 
 
 
+    # print output path to copy and paste in browser
+    print('Les fichiers se trouvent ici: ', feedback_commune_path)
+
     # finally clean temp folder
     # utils.cleanWorkingDirectory(path=feedback_commune_path)
 

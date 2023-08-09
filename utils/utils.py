@@ -318,7 +318,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
     ws2.cell(1,1).style = 'Title'
     ws2.cell(1,2).value = commune_name
     ws2.cell(1,2).style = 'Title'
-    ws2.cell(1,4).value = datetime.strftime(datetime.now(), '%d.%M.%Y')
+    ws2.cell(1,4).value = datetime.strftime(datetime.now(), '%d.%m.%Y')
     ws2.cell(1,6).value = 'Explicatif sur la manière de traiter les incohérences'
     ws2.cell(1,6).hyperlink = 'https://www.housing-stat.ch/files/Traitement_erreurs_FR.pdf'
     ws2.cell(1,6).style = 'Hyperlink'
@@ -339,7 +339,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
     ws2.cell(6,6).hyperlink = 'https://data.geo.admin.ch/ch.bfs.gebaeude_wohnungs_register/address/NE/{}_bdg_erw.kml'.format(commune_id)
     ws2.cell(6,6).style = 'Hyperlink'
 
-    ws2.cell(8,1).value = 'Bâtiments sans usage d''habitation (déjà dans le RegBL)'
+    ws2.cell(8,1).value = 'Bâtiments sans usage d\'habitation (déjà dans le RegBL)'
     ws2.cell(8,1).style = 'Headline 1'
     ws2.cell(9,1).value = 'Nombre'
     [ws2.merge_cells(start_row=9, start_column=2 + k*2, end_row=9, end_column=3 + k*2) for k in range(3)]
@@ -479,7 +479,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
     if ws_line_i is not None:
         ws2_line_i += 1
         
-        ws2.cell(ws2_line_i,1).value = 'LISTE 4 - Bâtiments sans usage d''habitation (déjà dans le RegBL)'
+        ws2.cell(ws2_line_i,1).value = 'LISTE 4 - Bâtiments sans usage d\'habitation (déjà dans le RegBL)'
         ws2.cell(ws2_line_i,1).style = 'Headline 1'
 
         ws2_line_i += 1

@@ -17,8 +17,6 @@ load_dotenv(r'..\..\.env')
 
 
 
-
-
 if __name__ == '__main__':
     # get feedback for canton de Neuchâtel
     communes_ofs = utils.loadCommunesOFS()
@@ -32,12 +30,12 @@ if __name__ == '__main__':
     # get lists
     feedback_canton_filepath = utils.downloadListeCantonNeuchatel(path=feedback_commune_path)
     (issue22_list, issue22_canton_filepath) = utils.downloadIssue22CantonNeuchatel(path=feedback_commune_path)
-
+    issue_solution = utils.get_issue_solution(os.environ['STATIC_PATH_ISSUE_SOLUTION_SGRF'])
 
     # go through each commune and create an excel with errors if any
     for commune_id in communes_ofs.keys():
         print(commune_id, communes_ofs[commune_id])
-        (feedback_commune_filepath, feedback_commune) = utils.generateCommuneErrorFile(commune_id, communes_ofs[commune_id], feedback_canton_filepath, issue22_list, today)
+        (feedback_commune_filepath, feedback_commune) = utils.generateCommuneErrorFile(commune_id, communes_ofs[commune_id], feedback_canton_filepath, issue22_list, issue_solution, today)
 
 
     # finally clean temp folder

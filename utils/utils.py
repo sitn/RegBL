@@ -73,19 +73,6 @@ def _getIssue22OfCommune(wb, commune_id, issue22_list):
     return wb
 
 
-def get_issue_solution(filepath):
-    if not os.path.exists(filepath):
-        print("Le fichier {} n'existe pas".format(filepath))
-        raise
-
-    data = {}
-    with open(filepath, 'r', encoding='utf-8') as f:
-        for line in f:
-            tmp = line.split(" ", maxsplit=1)
-            data[tmp[0]] = tmp[1][:-1]
-    return data
-
-
 def _get_issue(error, issue_solution):
     c_split = error.split("</br>")
     solutions = []
@@ -104,6 +91,19 @@ def _get_issue(error, issue_solution):
     else:
         issue =  "; ".join(solutions)
     return issue
+
+
+def get_issue_solution(filepath):
+    if not os.path.exists(filepath):
+        print("Le fichier {} n'existe pas".format(filepath))
+        raise
+
+    data = {}
+    with open(filepath, 'r', encoding='utf-8') as f:
+        for line in f:
+            tmp = line.split(" ", maxsplit=1)
+            data[tmp[0]] = tmp[1][:-1]
+    return data
 
 
 def loadCommunesOFS():
@@ -180,7 +180,7 @@ def cleanWorkingDirectory(path=None):
     return
 
 
-def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath, issue22_list, today=datetime.strftime(datetime.now(), '%Y%m%d')):
+def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath, issue22_list, issue_solution, today=datetime.strftime(datetime.now(), '%Y%m%d')):
     # copy canton_file to commune_file
     feedback_commune_filename = '_'.join([str(commune_id), commune_name.replace(' ', '_'), 'feedback', today]) + '.xlsx'
     feedback_commune_filepath = os.path.join(os.environ['FEEDBACK_COMMUNES_WORKING_DIR'], today, feedback_commune_filename)
@@ -212,8 +212,10 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
         if current_line_idx is None:
             continue
 
-        # find column "issues" if exists
-        issues_col_idx = _findColumnIndex(ws, 'ISSUES', row_id=current_line_idx)
+            # find column "issues" if exists
+            issues_col_idx = _findColumnIndex(ws, 'ISSUES', row_id=current_line_idx)
+            if issues_col_idx is not None:
+                ws.cell(current_line_idx,issues_col_idx+1).value = 'Suggestion de résolution (SGRF)'
 
         # update line index to first line in table
         current_line_idx += 1
@@ -230,27 +232,28 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     delete_row_idx = None
                     delete_row_amount = 0
 
-                # if column issues containes "<br>", change it to "\n"
-                if issues_col_idx is not None:
-                    ws.cell(current_line_idx,issues_col_idx).value = ws.cell(current_line_idx,issues_col_idx).value.replace('</br>',' || ')
+                    # if column issues containes "<br>", change it to "\n"
+                    if issues_col_idx is not None:
+                        ws.cell(current_line_idx,issues_col_idx+1).value = _get_issue(ws.cell(current_line_idx,issues_col_idx).value, issue_solution)
+                        ws.cell(current_line_idx,issues_col_idx).value = ws.cell(current_line_idx,issues_col_idx).value.replace('</br>',' || ')
 
-                # get coordinates to make geoportal link
-                if i>0:
-                    coord_e = None
-                    coord_n = None
-                    if i==1:
-                        coord_e = ws.cell(current_line_idx,10).value
-                        coord_n = ws.cell(current_line_idx,11).value
-                    if i==2:
-                        coord_e = ws.cell(current_line_idx,20).value
-                        coord_n = ws.cell(current_line_idx,21).value
-                    if i==3:
-                        coord_e = ws.cell(current_line_idx,16).value
-                        coord_n = ws.cell(current_line_idx,17).value
-                    if i==4:
-                        (coord_e, coord_n) = ws.cell(current_line_idx,9).value.split(' ')
-                    if i==5:
-                        (coord_e, coord_n) = ws.cell(current_line_idx,9).value.split(' ')
+                    # get coordinates to make geoportal link
+                    if i>0:
+                        coord_e = None
+                        coord_n = None
+                        if i==1:
+                            coord_e = ws.cell(current_line_idx,10).value
+                            coord_n = ws.cell(current_line_idx,11).value
+                        if i==2:
+                            coord_e = ws.cell(current_line_idx,20).value
+                            coord_n = ws.cell(current_line_idx,21).value
+                        if i==3:
+                            coord_e = ws.cell(current_line_idx,16).value
+                            coord_n = ws.cell(current_line_idx,17).value
+                        if i==4:
+                            (coord_e, coord_n) = ws.cell(current_line_idx,9).value.split(' ')
+                        if i==5:
+                            (coord_e, coord_n) = ws.cell(current_line_idx,9).value.split(' ')
 
                     ws.cell(current_line_idx,4).hyperlink = os.environ['FEEDBACK_COMMUNES_URL_CONSULTATION_ISSUE_22_SITN_COORD'].format(coord_e,coord_n)
                     ws.cell(current_line_idx,4).style = 'Hyperlink'

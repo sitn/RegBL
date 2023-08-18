@@ -20,6 +20,11 @@ load_dotenv(r'..\..\.env')
 
 
 if __name__ == '__main__':
+    # get argument$
+    environ = 'INTER'
+    if len(sys.argv) > 1 and sys.argv[1] == 'intra':
+        environ = 'INTRA' 
+
     # get feedback for canton de Neuchâtel
     communes_ofs = utils.loadCommunesOFS()
 
@@ -42,7 +47,7 @@ if __name__ == '__main__':
         # # if commune_id not in [6487, 6417]:
         #     continue
         print(commune_id, communes_ofs[commune_id])
-        (feedback_commune_filepath, feedback_commune) = utils.generateCommuneErrorFile_v2(commune_id, communes_ofs[commune_id], feedback_canton_filepath, issue22_list, issue_solution, today)
+        (feedback_commune_filepath, feedback_commune) = utils.generateCommuneErrorFile_v2(commune_id, communes_ofs[commune_id], feedback_canton_filepath, issue22_list, issue_solution, today, environ)
 
 
 

@@ -65,7 +65,7 @@ def _getIssue22OfCommune(wb, commune_id, issue22_list):
             ws.cell(currentLine_idx,5).value = i22['ISSUE_CATEGORY']
             ws.cell(currentLine_idx,6).value = i22['BDG_E']
             ws.cell(currentLine_idx,7).value = i22['BDG_N']
-            ws.cell(currentLine_idx,8).hyperlink = os.environ['FEEDBACK_COMMUNES_URL_CONSULTATION_ISSUE_22_SITN_COORD'].format(i22['BDG_E'],i22['BDG_N'])
+            ws.cell(currentLine_idx,8).hyperlink = os.environ['FEEDBACK_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(i22['BDG_E'],i22['BDG_N'])
             ws.cell(currentLine_idx,8).value = 'sitn.ne.ch'
             ws.cell(currentLine_idx,8).style = 'Hyperlink'
             currentLine_idx += 1
@@ -255,7 +255,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                         if i==5:
                             (coord_e, coord_n) = ws.cell(current_line_idx,9).value.split(' ')
 
-                    ws.cell(current_line_idx,4).hyperlink = os.environ['FEEDBACK_COMMUNES_URL_CONSULTATION_ISSUE_22_SITN_COORD'].format(coord_e,coord_n)
+                    ws.cell(current_line_idx,4).hyperlink = os.environ['FEEDBACK_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(coord_e,coord_n)
                     ws.cell(current_line_idx,4).style = 'Hyperlink'
 
                 nb_errors += 1
@@ -286,7 +286,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
 
 
 
-def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepath, issue22_list, issue_solution, today=datetime.strftime(datetime.now(), '%Y%m%d')):
+def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepath, issue22_list, issue_solution, today=datetime.strftime(datetime.now(), '%Y%m%d'), environ='INTER'):
     # copy canton_file to commune_file
     feedback_commune_filename = '_'.join([str(commune_id), commune_name.replace(' ', '_'), 'feedback', today]) + '.xlsx'
     feedback_commune_filepath = os.path.join(os.environ['FEEDBACK_COMMUNES_WORKING_DIR'], today, feedback_commune_filename)
@@ -427,7 +427,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
         while ws.cell(ws_line_i,2).value is not None:
             if ws.cell(ws_line_i,2).value == commune_id:
                 ws2.cell(ws2_line_i,1).value = ws.cell(ws_line_i,4).value
-                ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_ISSUE_22_SITN_COORD'].format(ws.cell(ws_line_i,11).value, ws.cell(ws_line_i,12).value)
+                ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(ws.cell(ws_line_i,11).value, ws.cell(ws_line_i,12).value)
                 ws2.cell(ws2_line_i,1).style = 'Hyperlink'
                 ws2.cell(ws2_line_i,2).value = ws.cell(ws_line_i,5).value
                 ws2.cell(ws2_line_i,3).value = ws.cell(ws_line_i,11).value
@@ -462,7 +462,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
         while ws.cell(ws_line_i,2).value is not None:
             if ws.cell(ws_line_i,2).value == commune_id:
                 ws2.cell(ws2_line_i,1).value = ws.cell(ws_line_i,4).value
-                ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_ISSUE_22_SITN_COORD'].format(ws.cell(ws_line_i,20).value, ws.cell(ws_line_i,21).value)
+                ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(ws.cell(ws_line_i,20).value, ws.cell(ws_line_i,21).value)
                 ws2.cell(ws2_line_i,1).style = 'Hyperlink'
                 ws2.cell(ws2_line_i,2).value = ws.cell(ws_line_i,8).value
                 ws2.cell(ws2_line_i,3).value = ws.cell(ws_line_i,9).value
@@ -502,7 +502,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
         while ws.cell(ws_line_i,2).value is not None:
             if ws.cell(ws_line_i,2).value == commune_id:
                 ws2.cell(ws2_line_i,1).value = ws.cell(ws_line_i,4).value
-                ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_ISSUE_22_SITN_COORD'].format(ws.cell(ws_line_i,7).value, ws.cell(ws_line_i,8).value)
+                ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(ws.cell(ws_line_i,7).value, ws.cell(ws_line_i,8).value)
                 ws2.cell(ws2_line_i,1).style = 'Hyperlink'
                 ws2.cell(ws2_line_i,2).value = ws.cell(ws_line_i,6).value
                 ws2.cell(ws2_line_i,3).value = ws.cell(ws_line_i,22).value
@@ -547,7 +547,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
             if ws.cell(ws_line_i,2).value == commune_id:
                 ws2.cell(ws2_line_i,1).value = ws.cell(ws_line_i,4).value
                 (coord_e, coord_n) = ws.cell(ws_line_i,9).value.split(' ')
-                ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_ISSUE_22_SITN_COORD'].format(coord_e, coord_n)
+                ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(coord_e, coord_n)
                 ws2.cell(ws2_line_i,1).style = 'Hyperlink'
                 ws2.cell(ws2_line_i,2).value = ws.cell(ws_line_i,5).value
                 ws2.cell(ws2_line_i,3).value = ws.cell(ws_line_i,6).value
@@ -590,7 +590,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
             if ws.cell(ws_line_i,2).value == commune_id:
                 ws2.cell(ws2_line_i,1).value = ws.cell(ws_line_i,4).value
                 (coord_e, coord_n) = ws.cell(ws_line_i,9).value.split(' ')
-                ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_ISSUE_22_SITN_COORD'].format(coord_e, coord_n)
+                ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(coord_e, coord_n)
                 ws2.cell(ws2_line_i,1).style = 'Hyperlink'
                 ws2.cell(ws2_line_i,2).value = ws.cell(ws_line_i,5).value
                 ws2.cell(ws2_line_i,3).value = ws.cell(ws_line_i,6).value
@@ -628,7 +628,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
             ws2.cell(ws2_line_i,1).value = i22['BDG_E']
             ws2.cell(ws2_line_i,2).value = i22['BDG_N']
             ws2.cell(ws2_line_i,3).value = 'sitn.ne.ch'
-            ws2.cell(ws2_line_i,3).hyperlink = os.environ['FEEDBACK_COMMUNES_URL_CONSULTATION_ISSUE_22_SITN_COORD'].format(i22['BDG_E'],i22['BDG_N'])
+            ws2.cell(ws2_line_i,3).hyperlink = os.environ['FEEDBACK_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(i22['BDG_E'],i22['BDG_N'])
             ws2.cell(ws2_line_i,3).style = 'Hyperlink'
             
             ws2_line_i += 1

@@ -20,10 +20,14 @@ load_dotenv(r'..\..\.env')
 
 
 if __name__ == '__main__':
-    # get argument$
-    environ = 'INTER'
-    if len(sys.argv) > 1 and sys.argv[1] == 'intra':
-        environ = 'INTRA' 
+    # get argument
+    environ_input = input("intra or inter (default): ")
+    if environ_input == 'intra':
+        environ = 'INTRA'
+    else:
+        environ = 'INTER' 
+
+    print(environ)
 
     # get feedback for canton de Neuchâtel
     communes_ofs = utils.loadCommunesOFS()

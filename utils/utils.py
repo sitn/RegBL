@@ -1,6 +1,5 @@
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
-from openpyxl.styles import PatternFill
 from datetime import datetime
 import requests
 import os
@@ -138,6 +137,14 @@ def downloadListeCantonNeuchatel(path=None):
 
     filepath = os.path.join(path, filename)
     open(filepath, 'wb').write(r.content)
+    tempfilepath = os.path.join(path, 'temp_' + filename)
+    open(tempfilepath, 'wb').write(r.content)
+
+    fme_command = 'fme "{}" --SourceDataset_POSTGIS "{}" --SourceDataset_XLSXR "{}" --DestDataset_XLSXW "{}"'.format(os.environ['FEEDBACK_COMMUNES_LISTES_BATPROJ_FILTER_FME_PATH'], os.environ['FEEDBACK_COMMUNES_LISTES_BATPROJ_FILTER_FME_USER'], tempfilepath, filepath)
+    print('\ncommand: {}"\n'.format(fme_command))
+    os.system(fme_command)
+
+    os.remove(tempfilepath)
 
     return filepath
 
@@ -155,8 +162,8 @@ def downloadIssue22CantonNeuchatel(path=None):
     tempfilepath = os.path.join(path, "temp_" + filename)
     open(tempfilepath, 'wb').write(r.content)
 
-    # Do something to treat with FME here
-    fme_command = 'fme "{}" --SourceDataset_XLSXR "{}" --DestDataset_XLSXW "{}'.format(os.environ['FEEDBACK_COMMUNES_ISSUE_22_FME_PATH'], tempfilepath, filepath)
+    # Filter projected buildings
+    fme_command = 'fme "{}" --SourceDataset_POSTGIS "{}" --SourceDataset_XLSXR "{}" --DestDataset_XLSXW "{}'.format(os.environ['FEEDBACK_COMMUNES_ISSUE_22_FME_PATH'], os.environ['FEEDBACK_COMMUNES_ISSUE_22_FME_USER'], tempfilepath, filepath)
     print('\ncommand: {}"\n'.format(fme_command))
     os.system(fme_command)
 
@@ -436,7 +443,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
         ws2_line_i += 1
 
         while ws.cell(ws_line_i,2).value is not None:
-            if ws.cell(ws_line_i,2).value == commune_id:
+            if ws.cell(ws_line_i,2).value == commune_id and ws.cell(ws_line_i, 18).value != 'bat_proj':
                 ws2.cell(ws2_line_i,1).value = ws.cell(ws_line_i,4).value
                 ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(ws.cell(ws_line_i,11).value, ws.cell(ws_line_i,12).value)
                 ws2.cell(ws2_line_i,1).style = 'Hyperlink'
@@ -471,7 +478,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
         ws2_line_i += 1
 
         while ws.cell(ws_line_i,2).value is not None:
-            if ws.cell(ws_line_i,2).value == commune_id:
+            if ws.cell(ws_line_i,2).value == commune_id and ws.cell(ws_line_i, 26).value != 'bat_proj':
                 ws2.cell(ws2_line_i,1).value = ws.cell(ws_line_i,4).value
                 ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(ws.cell(ws_line_i,20).value, ws.cell(ws_line_i,21).value)
                 ws2.cell(ws2_line_i,1).style = 'Hyperlink'
@@ -511,7 +518,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
         ws2_line_i += 1
 
         while ws.cell(ws_line_i,2).value is not None:
-            if ws.cell(ws_line_i,2).value == commune_id:
+            if ws.cell(ws_line_i,2).value == commune_id and ws.cell(ws_line_i, 25).value != 'bat_proj':
                 ws2.cell(ws2_line_i,1).value = ws.cell(ws_line_i,4).value
                 ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(ws.cell(ws_line_i,7).value, ws.cell(ws_line_i,8).value)
                 ws2.cell(ws2_line_i,1).style = 'Hyperlink'
@@ -555,7 +562,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
         ws2_line_i += 1
 
         while ws.cell(ws_line_i,2).value is not None:
-            if ws.cell(ws_line_i,2).value == commune_id:
+            if ws.cell(ws_line_i,2).value == commune_id and ws.cell(ws_line_i, 13).value != 'bat_proj':
                 ws2.cell(ws2_line_i,1).value = ws.cell(ws_line_i,4).value
                 (coord_e, coord_n) = ws.cell(ws_line_i,9).value.split(' ')
                 ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(coord_e, coord_n)
@@ -598,7 +605,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
         ws2_line_i += 1
 
         while ws.cell(ws_line_i,2).value is not None:
-            if ws.cell(ws_line_i,2).value == commune_id:
+            if ws.cell(ws_line_i,2).value == commune_id and ws.cell(ws_line_i, 13).value != 'bat_proj':
                 ws2.cell(ws2_line_i,1).value = ws.cell(ws_line_i,4).value
                 (coord_e, coord_n) = ws.cell(ws_line_i,9).value.split(' ')
                 ws2.cell(ws2_line_i,1).hyperlink = os.environ['RAPPORT_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(coord_e, coord_n)
@@ -619,11 +626,8 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
     #  ISSUE 22
     #####################
     anyI22 = False
-    yellowFill = PatternFill(start_color='00FFFF00',
-                   end_color='00FFFF00',
-                   fill_type='solid')
     for i22 in issue22_list:
-        if i22 ['COM_FOSNR'] == commune_id:
+        if i22['COM_FOSNR'] == commune_id:
             if anyI22 is False:
                 ws2_line_i += 1
                 ws2.cell(ws2_line_i,1).value = 'Bâtiments manquants'
@@ -646,8 +650,6 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
             ws2.cell(ws2_line_i,3).hyperlink = os.environ['FEEDBACK_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(i22['BDG_E'],i22['BDG_N'])
             ws2.cell(ws2_line_i,3).style = 'Hyperlink'
             ws2.cell(ws2_line_i,4).value = i22['DESIGNATION_MO']
-            if 'habitation' in i22['DESIGNATION_MO']:
-                ws2.cell(ws2_line_i,4).fill = yellowFill
 
             
             ws2_line_i += 1

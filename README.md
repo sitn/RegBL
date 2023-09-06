@@ -3,6 +3,7 @@ Boîte à outils pour la gestion du RegBL
 
 ## Prérequis
 * Python 3.10 ou ultérieur + git version 2.37.3 ou ultérieur
+* Certains exécutables dépendent du logiciel FME (v2, 2022)
 * Dossier git initialisé pour le projet
 ```
 git init

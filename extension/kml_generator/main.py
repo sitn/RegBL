@@ -66,17 +66,49 @@ def xlsx2kml(filepath, sheetname, kml_filename):
         #     pnt.style.labelstyle.color = simplekml.Color.red
         
         ############################################
-        #   AFFICHE LES ADRESSES DANS LE EN VERT   #
+        #   AFFICHE LES ADRESSES EN VERT   #
         ############################################
         
         if ws.cell(i,21).value == 'oui':
             continue
 
-        pnt = kml.newpoint(
-            name = ', '.join(filter(None, [ws.cell(i,1).value, ws.cell(i,39).value])),
-            coords = [TF.transform(float(ws.cell(i,30).value), float(ws.cell(i,31).value))],
-        )
-        pnt.style.labelstyle.color = simplekml.Color.green
+        
+        # # numéro d'adresse
+        # try:
+        #     if float(ws.cell(i,9).value) >= 50:
+        #         pnt = kml.newpoint(
+        #         name = ', '.join(filter(None, [ws.cell(i,1).value, ws.cell(i,39).value])),
+        #         coords = [TF.transform(float(ws.cell(i,30).value), float(ws.cell(i,31).value))],
+        #     )
+        #     pnt.style.labelstyle.color = simplekml.Color.green
+            
+        # except:
+        #     continue
+
+
+        # distance à l'adresse la plus proche
+        try:
+            if ws.cell(i,50).value == 'x':
+                pnt = kml.newpoint(
+                    name = ', '.join(filter(None, [ws.cell(i,1).value, ws.cell(i,39).value])),
+                    coords = [TF.transform(float(ws.cell(i,30).value), float(ws.cell(i,31).value))],
+                )
+            pnt.style.labelstyle.color = simplekml.Color.green
+            
+        except:
+            continue
+
+        # if ws.cell(i,9).value.isnumeric():
+        #     if ws.cell(i,9) < 50:
+        #         continue
+        # else:
+        #     continue
+
+        # pnt = kml.newpoint(
+        #     name = ', '.join(filter(None, [ws.cell(i,1).value, ws.cell(i,39).value])),
+        #     coords = [TF.transform(float(ws.cell(i,30).value), float(ws.cell(i,31).value))],
+        # )
+        # pnt.style.labelstyle.color = simplekml.Color.green
         
         ####################################################
         #   AFFICHE LES PROBLEMES DANS LE CTRL3 EN ROUGE   #

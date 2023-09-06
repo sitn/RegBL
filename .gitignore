@@ -131,3 +131,6 @@ dmypy.json
 # excel files
 *.xlsx
 *.xls
+
+# recover files
+*.recover

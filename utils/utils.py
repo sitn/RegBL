@@ -1,5 +1,6 @@
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
+from openpyxl.styles import PatternFill
 from datetime import datetime
 import requests
 import os
@@ -151,6 +152,15 @@ def downloadIssue22CantonNeuchatel(path=None):
 
     filepath = os.path.join(path, filename)
     open(filepath, 'wb').write(r.content)
+    tempfilepath = os.path.join(path, "temp_" + filename)
+    open(tempfilepath, 'wb').write(r.content)
+
+    # Do something to treat with FME here
+    fme_command = 'fme "{}" --SourceDataset_XLSXR "{}" --DestDataset_XLSXW "{}'.format(os.environ['FEEDBACK_COMMUNES_ISSUE_22_FME_PATH'], tempfilepath, filepath)
+    print('\ncommand: {}"\n'.format(fme_command))
+    os.system(fme_command)
+
+    os.remove(tempfilepath)
 
     wb = load_workbook(filepath)
     ws = wb['NE']
@@ -166,7 +176,8 @@ def downloadIssue22CantonNeuchatel(path=None):
                 'ISSUE': ws.cell(i,4).value,
                 'ISSUE_CATEGORY': ws.cell(i,5).value,
                 'BDG_E': ws.cell(i,6).value,
-                'BDG_N': ws.cell(i,7).value
+                'BDG_N': ws.cell(i,7).value,
+                'DESIGNATION_MO': ws.cell(i,8).value
             })
 
         i += 1
@@ -608,6 +619,9 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
     #  ISSUE 22
     #####################
     anyI22 = False
+    yellowFill = PatternFill(start_color='00FFFF00',
+                   end_color='00FFFF00',
+                   fill_type='solid')
     for i22 in issue22_list:
         if i22 ['COM_FOSNR'] == commune_id:
             if anyI22 is False:
@@ -620,6 +634,7 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
                 ws2.cell(ws2_line_i,1).value = 'COORDE'
                 ws2.cell(ws2_line_i,2).value = 'COORDN'
                 ws2.cell(ws2_line_i,3).value = 'LINK'
+                ws2.cell(ws2_line_i,4).value = 'DESIGNATION_MO'
                 
                 ws2_line_i += 1
                 
@@ -630,6 +645,10 @@ def generateCommuneErrorFile_v2(commune_id, commune_name, feedback_canton_filepa
             ws2.cell(ws2_line_i,3).value = 'sitn.ne.ch'
             ws2.cell(ws2_line_i,3).hyperlink = os.environ['FEEDBACK_COMMUNES_URL_CONSULTATION_' + environ + '_ISSUE_22_SITN_COORD'].format(i22['BDG_E'],i22['BDG_N'])
             ws2.cell(ws2_line_i,3).style = 'Hyperlink'
+            ws2.cell(ws2_line_i,4).value = i22['DESIGNATION_MO']
+            if 'habitation' in i22['DESIGNATION_MO']:
+                ws2.cell(ws2_line_i,4).fill = yellowFill
+
             
             ws2_line_i += 1
 

@@ -19,14 +19,14 @@ load_dotenv(r'..\..\.env')
 
 
 if __name__ == '__main__':
-    # get argument
-    environ_input = input("intra or inter (default): ")
-    if environ_input == 'intra':
-        environ = 'INTRA'
-    else:
-        environ = 'INTER' 
-
+    # get arguments
+    environ_input = input("Hyperliens [inter | intra (default)]: ")
+    environ = 'INTER' if environ_input == 'inter' else 'INTRA'
     print(environ)
+    
+    batprojtreat_input = input("Filtrer les batiments projetés [oui (défaut) | non]: ")
+    batprojtreat = False if batprojtreat_input == 'non' else True
+    print('Oui' if batprojtreat is True else "Non")
 
     # get feedback for canton de Neuchâtel
     communes_ofs = utils.loadCommunesOFS()
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     os.makedirs(feedback_commune_path)
 
     # get lists
-    feedback_canton_filepath = utils.downloadListeCantonNeuchatel(path=feedback_commune_path)
+    feedback_canton_filepath = utils.downloadListeCantonNeuchatel(path=feedback_commune_path, batprojtreat=batprojtreat)
     (issue22_list, issue22_canton_filepath) = utils.downloadIssue22CantonNeuchatel(path=feedback_commune_path)
     
     path_issue_solution = os.environ['RAPPORT_ANALYZER_ISSUE_SOLUTION_PATH']
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     for commune_id in communes_ofs.keys():
         # if commune_id not in [6487]:
         # # if commune_id not in [6487, 6417]:
-        #     continue
+            # continue
         print(commune_id, communes_ofs[commune_id])
         (feedback_commune_filepath, feedback_commune) = utils.generateCommuneErrorFile(commune_id, communes_ofs[commune_id], feedback_canton_filepath, issue22_list, issue_solution, today, environ)
 

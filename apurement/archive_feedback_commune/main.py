@@ -22,8 +22,8 @@ for f in files:
     file_path = os.path.join(source_path, f)
 
     wb = load_workbook(file_path)
-    
-    
+
+
     ###########################
     #   CANTON
     ###########################
@@ -101,7 +101,7 @@ for f in files:
 
     line_i = utils._findRowIndex(ws, 'Canton', column_id=2)
     line_i += 2
-    
+
     while ws.cell(line_i, 2).value == 'NE':
         data = None
         data = RegBLApurementFeedbackHebdoCommunes()

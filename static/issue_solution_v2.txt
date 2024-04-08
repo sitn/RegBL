@@ -1,0 +1,24 @@
+﻿01 Bâtiment à cheval sur deux communes. Whitelister le bâtiment sur l'une des communes.
+12 Divergence de coordonnées entre les données de la MO et du RegBL dans la même commune, mais jointure sur le numéro EGID. Ne rien faire.
+13 Divergence de coordonnées entre les données de la MO et du RegBL dans des communes différentes, mais jointure sur le numéro EGID. Ne rien faire.
+14 Divergence de coordonnées entre les données de la MO et du RegBL dans la même commune, mais jointure sur le numéro EGID. Bâtiment démoli ou non réalisé. Ne rien faire.
+21 Ne rien faire
+22 (Pas encore rencontré)
+23 (Pas encore rencontré)
+24 (Pas encore rencontré)
+31 Bâtiment démoli? Supprimer l'EGID
+32 Ajouter les coordonnées du bâtiment dans le RegBL
+33 Bâtiment projeté, ne rien faire
+34 (Pas encore rencontré)
+35 EGID à réunir
+41 Corriger le statut du bâtiment (GSTAT) en fonction de celui de la MO
+42 L'erreur peut provenir de deux sources, les coordonnées du bâtiment sont fausses (à corriger) ou la catégorie du bâtiment (GKAT) est fausse (à corriger)
+43 Contrôler la catégorie du bâtiment (GKAT), déclaré comme temporaire
+44 (Pas encore rencontré) Le bâtiment est annoncé démoli dans le RegBL. Corriger le statut du bâtiment (GSTAT) ou prendre contact avec le SGRF
+51 (Pas encore rencontré) Un EGID pour plusieurs bâtiments de la MO. Contrôler la pertinence de diviser le bâtiment ou donner un EGID par bâtiment de la MO
+52 EGID différent pour un bâtiment entre la base MO et le RegBL. Prendre contact avec le SGRF
+61 Ne rien faire
+62 EGID à réunir ou communiquer au SGRF les informations pour la division du bâtiment
+31-32 Ne rien faire
+43-62 Ne rien faire
+61-62 Contrôler s'il n'y a pas d'EGID à corriger (déplacer/réunir). Sinon, ne rien faire

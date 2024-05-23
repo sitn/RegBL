@@ -53,18 +53,23 @@ if __name__ == "__main__":
         csv_fieldnames.insert(0, "Commune")
         csv_fieldnames.append("Issue_22")
         # csv_fieldnames = ["Commune", [f"Liste_{i+1}" for i in range(6)], "Issue_22"]
-        writer = csv.DictWriter(csvfile, fieldnames=csv_fieldnames)
+        writer = csv.DictWriter(csvfile, fieldnames=csv_fieldnames, delimiter=";")
         writer.writeheader()
 
         # go through each commune and create an excel with errors if any
         for commune_id in communes_ofs.keys():
             # if commune_id not in [6487]:
-            # # if commune_id not in [6487, 6417]:
-            #   continue
+            # if commune_id not in [6487, 6417, 6458, 6416]:
+            #     continue
             print(commune_id, communes_ofs[commune_id])
             (feedback_commune_filepath, feedback_commune, nb_errors_by_list) = utils.generateCommuneErrorFile(commune_id, communes_ofs[commune_id], feedback_canton_filepath, issue22_list, issue_solution, today, environ, egidextfilter, log=False)
 
             csvfile = writer.writerow(nb_errors_by_list)
+
+        # do the same for the canton
+        print("Canton de Neuchâtel")
+        (feedback_commune_filepath, feedback_commune, nb_errors_by_list) = utils.generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", log=False)
+        csvfile = writer.writerow(nb_errors_by_list)
 
     # print output path to copy and paste in browser
     print("Les fichiers se trouvent ici: ", feedback_commune_path)

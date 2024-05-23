@@ -1,5 +1,5 @@
-﻿00 (Pas encore rencontré)
-01 (Pas encore rencontré)
+﻿00 Ne rien faire
+01 Annoncer au SGRF que le bâtiment chevauche une limite communale
 11 (Pas encore rencontré)
 12 (Pas encore rencontré)
 13 (Pas encore rencontré)
@@ -8,17 +8,18 @@
 22 (Pas encore rencontré)
 23 (Pas encore rencontré)
 24 (Pas encore rencontré)
-31 Bâtiment projeté? => Ne rien faire / Bâtiment démoli? Supprimer l'EGID
+31 Adapter le statut du bâtiment (bâtiment démoli?)
 32 Ajouter les coordonnées du bâtiment dans le RegBL
 33 Bâtiment projeté, ne rien faire
 34 (Pas encore rencontré)
 35 EGID à réunir
+36 (Pas encore rencontré)
 41 Corriger le statut du bâtiment (GSTAT) en fonction de celui de la MO
 42 L'erreur peut provenir de deux sources, les coordonnées du bâtiment sont fausses (à corriger) ou la catégorie du bâtiment (GKAT) est fausse (à corriger)
 43 Contrôler la catégorie du bâtiment (GKAT), déclaré comme temporaire
-44 (Pas encore rencontré) Le bâtiment est annoncé démoli dans le RegBL. Corriger le statut du bâtiment (GSTAT) ou prendre contact avec le SGRF
-51 (Pas encore rencontré) Un EGID pour plusieurs bâtiments de la MO. Contrôler la pertinence de diviser le bâtiment ou donner un EGID par bâtiment de la MO
-52 EGID différent pour un bâtiment entre la base MO et le RegBL. Prendre contact avec le SGRF
+44 Le bâtiment est annoncé démoli dans le RegBL. Corriger le statut du bâtiment (GSTAT) ou prendre contact avec le SGRF
+51 Un EGID pour plusieurs bâtiments de la MO. Contrôler la pertinence de diviser le bâtiment ou donner un EGID par bâtiment de la MO
+52 EGID différents pour un bâtiment entre la base MO et le RegBL. Prendre contact avec le SGRF
 61 Ne rien faire
 62 EGID à réunir ou communiquer au SGRF les informations pour la division du bâtiment
 31-32 Ne rien faire

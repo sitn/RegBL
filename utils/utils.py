@@ -294,9 +294,10 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     ws2.cell(11, 8).value = "(GKAT 1060, GAREA > 30m2)"
 
     ws2_line_i = 12
-    ws2_line_i_init = 12
     if log:
         print("Infos gen - end")
+
+    (table_start_row, table_end_row) = (0, 0)
 
     #####################
     #  LISTE 1
@@ -336,10 +337,11 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        ref = "A" + str(table_start_row) + ":" + get_column_letter(5) + str(table_end_row)
-        _createExcelTable(ws2, "Liste1", ref)
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(5) + str(table_end_row)
+            _createExcelTable(ws2, "Liste1", ref)
 
-    nb_errors_by_list["Liste_1"] = ws2_line_i - ws2_line_i_init
+    nb_errors_by_list["Liste_1"] = table_end_row - table_start_row
     if log:
         print("Liste 1 - end")
 
@@ -381,10 +383,11 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        ref = "A" + str(table_start_row) + ":" + get_column_letter(4) + str(table_end_row)
-        _createExcelTable(ws2, "Liste2", ref)
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(4) + str(table_end_row)
+            _createExcelTable(ws2, "Liste2", ref)
 
-    nb_errors_by_list["Liste_2"] = ws2_line_i - nb_errors_by_list.get("Liste_1", 0) - ws2_line_i_init
+    nb_errors_by_list["Liste_2"] = table_end_row - table_start_row
     if log:
         print("Liste 2 - end")
 
@@ -428,10 +431,11 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        ref = "A" + str(table_start_row) + ":" + get_column_letter(5) + str(table_end_row)
-        _createExcelTable(ws2, "Liste3", ref)
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(5) + str(table_end_row)
+            _createExcelTable(ws2, "Liste3", ref)
 
-    nb_errors_by_list["Liste_3"] = ws2_line_i - nb_errors_by_list.get("Liste_2", 0) - ws2_line_i_init
+    nb_errors_by_list["Liste_3"] = table_end_row - table_start_row
     if log:
         print("Liste 3 - end")
 
@@ -483,10 +487,11 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        ref = "A" + str(table_start_row) + ":" + get_column_letter(9) + str(table_end_row)
-        _createExcelTable(ws2, "Liste4", ref)
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(9) + str(table_end_row)
+            _createExcelTable(ws2, "Liste4", ref)
 
-    nb_errors_by_list["Liste_4"] = ws2_line_i - nb_errors_by_list.get("Liste_3", 0) - ws2_line_i_init
+    nb_errors_by_list["Liste_4"] = table_end_row - table_start_row
     if log:
         print("Liste 4 - end")
 
@@ -537,10 +542,11 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        ref = "A" + str(table_start_row) + ":" + get_column_letter(8) + str(table_end_row)
-        _createExcelTable(ws2, "Liste5", ref)
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(8) + str(table_end_row)
+            _createExcelTable(ws2, "Liste5", ref)
 
-    nb_errors_by_list["Liste_5"] = ws2_line_i - nb_errors_by_list.get("Liste_4", 0) - ws2_line_i_init
+    nb_errors_by_list["Liste_5"] = table_end_row - table_start_row
     if log:
         print("Liste 5 - end")
 
@@ -591,10 +597,11 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        ref = "A" + str(table_start_row) + ":" + get_column_letter(8) + str(table_end_row)
-        _createExcelTable(ws2, "Liste6", ref)
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(8) + str(table_end_row)
+            _createExcelTable(ws2, "Liste6", ref)
 
-    nb_errors_by_list["Liste_6"] = ws2_line_i - nb_errors_by_list.get("Liste_5", 0) - ws2_line_i_init
+    nb_errors_by_list["Liste_6"] = table_end_row - table_start_row
     if log:
         print("Liste 6 - end")
 
@@ -634,10 +641,394 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
 
     if anyI22 is True:
         table_end_row = ws2_line_i - 1
-        ref = "A" + str(table_start_row) + ":" + get_column_letter(4) + str(table_end_row)
-        _createExcelTable(ws2, "issue22", ref)
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(4) + str(table_end_row)
+            _createExcelTable(ws2, "issue22", ref)
 
-    nb_errors_by_list["Issue_22"] = ws2_line_i - nb_errors_by_list.get("Liste_6", 0) - ws2_line_i_init
+    nb_errors_by_list["Issue_22"] = table_end_row - table_start_row
+    if log:
+        print("Issue 22 - end")
+
+    # ajuster la largeur des colonnes
+    for i in range(10):
+        ws2.column_dimensions[get_column_letter(i + 1)].width = "11"
+
+    # supprimer toutes les colonnes autres que "resume"
+    for ws_name in wb.sheetnames:
+        if not ws_name == "resume":
+            wb.remove(wb[ws_name])
+
+    wb.save(feedback_commune_filepath)
+
+    return (feedback_commune_filepath, feedback_commune, nb_errors_by_list)
+
+
+def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", log=False):
+    # copy canton_file to commune_file
+    feedback_commune_filename = "_".join(["Canton_de_Neuchâtel", "SGRF", "feedback", today]) + ".xlsx"
+    feedback_commune_filepath = os.path.join(os.environ["FEEDBACK_COMMUNES_WORKING_DIR"], today, feedback_commune_filename)
+    shutil.copy2(feedback_canton_filepath, feedback_commune_filepath)
+
+    nb_errors_by_list = {}
+    nb_errors_by_list["Commune"] = "Canton de Neuchâtel"
+
+    feedback_commune = {"commune_id": 0, "commune_nom": "Canton de Neuchâtel"}
+
+    wb = load_workbook(feedback_commune_filepath)
+    if log:
+        print(f"${feedback_commune_filepath} loaded")
+
+    # Create resume sheet
+    ws2 = wb.create_sheet("resume")
+
+    #####################
+    #  INFOS GENERALES
+    #####################
+    if log:
+        print("Infos gen - start")
+    ws = wb["Communes"]
+
+    # ws2.cell(1, 1).value = commune_id
+    # ws2.cell(1, 1).style = "Title"
+    ws2.cell(1, 2).value = "Canton de Neuchâtel"
+    ws2.cell(1, 2).style = "Title"
+    ws2.cell(1, 4).value = datetime.strftime(datetime.now(), "%d.%m.%Y")
+    ws2.cell(1, 6).value = "Explicatif sur la manière de traiter les incohérences"
+    ws2.cell(1, 6).hyperlink = "https://www.housing-stat.ch/files/Traitement_erreurs_FR.pdf"
+    ws2.cell(1, 6).style = "Hyperlink"
+
+    ws2_line_i = 3
+    if log:
+        print("Infos gen - end")
+
+    (table_start_row, table_end_row) = (0, 0)
+
+    #####################
+    #  LISTE 1
+    #####################
+    if log:
+        print("Liste 1 - start")
+    ws = wb["Liste 1"]
+    ws_line_i = 7
+
+    if ws_line_i is not None:
+        ws2_line_i += 1
+
+        ws2.cell(ws2_line_i, 1).value = "LISTE 1 - Bâtiments sans coordonnées"
+        ws2.cell(ws2_line_i, 1).style = "Headline 1"
+
+        ws2_line_i += 1
+        table_start_row = ws2_line_i
+
+        ws2.cell(ws2_line_i, 1).value = "COMMUNE"
+        ws2.cell(ws2_line_i, 2).value = "EGID"
+        ws2.cell(ws2_line_i, 3).value = "STRNAME"
+        ws2.cell(ws2_line_i, 4).value = "DEINR"
+        ws2.cell(ws2_line_i, 5).value = "PLZ4"
+        ws2.cell(ws2_line_i, 6).value = "PLZNAME"
+
+        ws2_line_i += 1
+
+        while ws.cell(ws_line_i, 2).value is not None:
+            if ws.cell(ws_line_i, 4).value >= 500000000:
+                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
+                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
+                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 11).value
+                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 12).value
+                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 13).value
+                ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 15).value
+
+                ws2_line_i += 1
+
+            ws_line_i += 1
+
+        table_end_row = ws2_line_i - 1
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(6) + str(table_end_row)
+            _createExcelTable(ws2, "Liste1", ref)
+
+    nb_errors_by_list["Liste_1"] = table_end_row - table_start_row
+    if log:
+        print("Liste 1 - end")
+
+    #####################
+    #  LISTE 2
+    #####################
+    if log:
+        print("Liste 2 - start")
+    ws = wb["Liste 2"]
+    ws_line_i = 7
+
+    if ws_line_i is not None:
+        ws2_line_i += 1
+
+        ws2.cell(ws2_line_i, 1).value = "LISTE 2 - Coordonnées en dehors de la commune"
+        ws2.cell(ws2_line_i, 1).style = "Headline 1"
+
+        ws2_line_i += 1
+        table_start_row = ws2_line_i
+
+        ws2.cell(ws2_line_i, 1).value = "COMMUNE"
+        ws2.cell(ws2_line_i, 2).value = "EGID"
+        ws2.cell(ws2_line_i, 3).value = "Adresse"
+        ws2.cell(ws2_line_i, 4).value = "GKODE"
+        ws2.cell(ws2_line_i, 5).value = "GKODN"
+
+        ws2_line_i += 1
+
+        while ws.cell(ws_line_i, 2).value is not None:
+            print("ws.cell(ws_line_i, 4).value =", ws.cell(ws_line_i, 4).value)
+            if ws.cell(ws_line_i, 4).value and ws.cell(ws_line_i, 4).value >= 500000000:
+                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
+                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
+                ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 11).value, ws.cell(ws_line_i, 12).value)
+                ws2.cell(ws2_line_i, 2).style = "Hyperlink"
+                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 5).value
+                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 11).value
+                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 12).value
+
+                ws2_line_i += 1
+
+            ws_line_i += 1
+
+        table_end_row = ws2_line_i - 1
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(5) + str(table_end_row)
+            _createExcelTable(ws2, "Liste2", ref)
+
+    nb_errors_by_list["Liste_2"] = table_end_row - table_start_row
+    if log:
+        print("Liste 2 - end")
+
+    #####################
+    #  LISTE 3
+    #####################
+    if log:
+        print("Liste 3 - start")
+    ws = wb["Liste 3"]
+    ws_line_i = 7
+
+    if ws_line_i is not None:
+        ws2_line_i += 1
+
+        ws2.cell(ws2_line_i, 1).value = "LISTE 3 - Divergence de NPA"
+        ws2.cell(ws2_line_i, 1).style = "Headline 1"
+
+        ws2_line_i += 1
+        table_start_row = ws2_line_i
+
+        ws2.cell(ws2_line_i, 1).value = "COMMUNE"
+        ws2.cell(ws2_line_i, 2).value = "EGID"
+        ws2.cell(ws2_line_i, 3).value = "PLZ4 RegBL"
+        ws2.cell(ws2_line_i, 4).value = "PLZ4_Name RegBL"
+        ws2.cell(ws2_line_i, 5).value = "PLZ4 MO"
+        ws2.cell(ws2_line_i, 6).value = "PLZ4_Name MO"
+
+        ws2_line_i += 1
+
+        while ws.cell(ws_line_i, 2).value is not None:
+            if ws.cell(ws_line_i, 4).value >= 500000000:
+                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
+                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
+                ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 20).value, ws.cell(ws_line_i, 21).value)
+                ws2.cell(ws2_line_i, 2).style = "Hyperlink"
+                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 8).value
+                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 9).value
+                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 11).value
+                ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 12).value
+
+                ws2_line_i += 1
+
+            ws_line_i += 1
+
+        table_end_row = ws2_line_i - 1
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(6) + str(table_end_row)
+            _createExcelTable(ws2, "Liste3", ref)
+
+    nb_errors_by_list["Liste_3"] = table_end_row - table_start_row
+    if log:
+        print("Liste 3 - end")
+
+    #####################
+    #  LISTE 4
+    #####################
+    if log:
+        print("Liste 4 - start")
+    ws = wb["Liste 4"]
+    ws_line_i = 7
+
+    if ws_line_i is not None:
+        ws2_line_i += 1
+
+        ws2.cell(ws2_line_i, 1).value = "LISTE 4 - Doublets d'adresses"
+        ws2.cell(ws2_line_i, 1).style = "Headline 1"
+
+        ws2_line_i += 1
+        table_start_row = ws2_line_i
+
+        ws2.cell(ws2_line_i, 1).value = "COMMUNE"
+        ws2.cell(ws2_line_i, 2).value = "EGID"
+        ws2.cell(ws2_line_i, 3).value = "GKAT"
+        ws2.cell(ws2_line_i, 4).value = "GPARZ"
+        ws2.cell(ws2_line_i, 5).value = "GEBNR"
+        ws2.cell(ws2_line_i, 6).value = "STRNAME"
+        ws2.cell(ws2_line_i, 7).value = "DEINR"
+        ws2.cell(ws2_line_i, 8).value = "PLZ4"
+        ws2.cell(ws2_line_i, 9).value = "GBEZ"
+        ws2.cell(ws2_line_i, 10).value = "BUR / REE"
+
+        ws2_line_i += 1
+
+        while ws.cell(ws_line_i, 2).value is not None:
+            if ws.cell(ws_line_i, 4).value >= 500000000:
+                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
+                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
+                ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 7).value, ws.cell(ws_line_i, 8).value)
+                ws2.cell(ws2_line_i, 2).style = "Hyperlink"
+                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 6).value
+                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 22).value
+                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 23).value
+                ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 11).value
+                ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 12).value
+                ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 13).value
+                ws2.cell(ws2_line_i, 9).value = ws.cell(ws_line_i, 14).value
+                ws2.cell(ws2_line_i, 10).value = ws.cell(ws_line_i, 24).value
+
+                ws2_line_i += 1
+
+            ws_line_i += 1
+
+        table_end_row = ws2_line_i - 1
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(10) + str(table_end_row)
+            _createExcelTable(ws2, "Liste4", ref)
+
+    nb_errors_by_list["Liste_4"] = table_end_row - table_start_row
+    if log:
+        print("Liste 4 - end")
+
+    #####################
+    #  LISTE 5
+    #####################
+    if log:
+        print("Liste 5 - start")
+    ws = wb["Liste 5"]
+    ws_line_i = 7
+
+    if ws_line_i is not None:
+        ws2_line_i += 1
+
+        ws2.cell(ws2_line_i, 1).value = "LISTE 5 - Définition du bâtiment"
+        ws2.cell(ws2_line_i, 1).style = "Headline 1"
+
+        ws2_line_i += 1
+        table_start_row = ws2_line_i
+
+        ws2.cell(ws2_line_i, 1).value = "COMMUNE"
+        ws2.cell(ws2_line_i, 2).value = "EGID"
+        ws2.cell(ws2_line_i, 3).value = "GKAT"
+        ws2.cell(ws2_line_i, 4).value = "GKLAS"
+        ws2.cell(ws2_line_i, 5).value = "GSTAT"
+        ws2.cell(ws2_line_i, 6).value = "GKODE"
+        ws2.cell(ws2_line_i, 7).value = "GKODN"
+        ws2.cell(ws2_line_i, 8).value = "ISSUE"
+        ws2.cell(ws2_line_i, 9).value = "RESOLUTION_SGRF"
+
+        ws2_line_i += 1
+
+        while ws.cell(ws_line_i, 2).value is not None:
+            if ws.cell(ws_line_i, 4).value >= 500000000:
+                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
+                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
+                (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
+                ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
+                ws2.cell(ws2_line_i, 2).style = "Hyperlink"
+                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 5).value
+                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 6).value
+                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 7).value
+                ws2.cell(ws2_line_i, 6).value = coord_e
+                ws2.cell(ws2_line_i, 7).value = coord_n
+                ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 12).value
+                ws2.cell(ws2_line_i, 9).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
+
+                ws2_line_i += 1
+
+            ws_line_i += 1
+
+        table_end_row = ws2_line_i - 1
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(9) + str(table_end_row)
+            _createExcelTable(ws2, "Liste5", ref)
+
+    nb_errors_by_list["Liste_5"] = table_end_row - table_start_row
+    if log:
+        print("Liste 5 - end")
+
+    #####################
+    #  LISTE 6
+    #####################
+    if log:
+        print("Liste 6 - start")
+    ws = wb["Liste 6"]
+    ws_line_i = 7
+
+    if ws_line_i is not None:
+        ws2_line_i += 1
+
+        ws2.cell(ws2_line_i, 1).value = "Liste 6 - Catégorie du bâtiment"
+        ws2.cell(ws2_line_i, 1).style = "Headline 1"
+
+        ws2_line_i += 1
+        table_start_row = ws2_line_i
+
+        ws2.cell(ws2_line_i, 1).value = "COMMUNE"
+        ws2.cell(ws2_line_i, 2).value = "EGID"
+        ws2.cell(ws2_line_i, 3).value = "GKAT"
+        ws2.cell(ws2_line_i, 4).value = "GKLAS"
+        ws2.cell(ws2_line_i, 5).value = "GSTAT"
+        ws2.cell(ws2_line_i, 6).value = "GKODE"
+        ws2.cell(ws2_line_i, 7).value = "GKODN"
+        ws2.cell(ws2_line_i, 8).value = "ISSUE"
+        ws2.cell(ws2_line_i, 9).value = "RESOLUTION_SGRF"
+
+        ws2_line_i += 1
+
+        while ws.cell(ws_line_i, 2).value is not None:
+            if ws.cell(ws_line_i, 4).value >= 500000000:
+                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
+                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
+                (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
+                ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
+                ws2.cell(ws2_line_i, 2).style = "Hyperlink"
+                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 5).value
+                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 6).value
+                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 7).value
+                ws2.cell(ws2_line_i, 6).value = coord_e
+                ws2.cell(ws2_line_i, 7).value = coord_n
+                ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 12).value
+                ws2.cell(ws2_line_i, 9).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
+
+                ws2_line_i += 1
+
+            ws_line_i += 1
+
+        table_end_row = ws2_line_i - 1
+        if table_end_row > table_start_row:
+            ref = "A" + str(table_start_row) + ":" + get_column_letter(9) + str(table_end_row)
+            _createExcelTable(ws2, "Liste6", ref)
+
+    nb_errors_by_list["Liste_6"] = table_end_row - table_start_row
+    if log:
+        print("Liste 6 - end")
+
+    #####################
+    #  ISSUE 22
+    #####################
+    if log:
+        print("Issue 22 - start")
+
+    nb_errors_by_list["Issue_22"] = 0
     if log:
         print("Issue 22 - end")
 

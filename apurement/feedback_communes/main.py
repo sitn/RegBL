@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import csv
 import sys
 
-sys.path.insert(0, r"..\..\utils")
+sys.path.insert(0, r".\utils")
 import utils
 
 
@@ -12,22 +12,34 @@ import os
 from datetime import datetime
 
 
-load_dotenv(r"..\..\.env")
+load_dotenv(r".\.env")
 
 
 if __name__ == "__main__":
-    # get arguments
-    environ_input = input("Hyperliens [inter | intra (default)]: ")
-    environ = "INTER" if environ_input == "inter" else "INTRA"
-    print(environ)
+    if len(sys.argv) == 1:
+        # get arguments
+        environ_input = input("Filtrer les EGID > 500000000 [oui (défaut) | non]:")
+        environ = "INTER" if environ_input == "inter" else "INTRA"
+        print(environ)
 
-    batprojtreat_input = input("Filtrer les batiments projetés [oui (défaut) | non]: ")
-    batprojtreat = False if batprojtreat_input == "non" else True
-    print("Oui" if batprojtreat is True else "Non")
+        batprojtreat_input = input("Filtrer les batiments projetés [oui (défaut) | non]: ")
+        batprojtreat = False if batprojtreat_input == "non" else True
+        print("Oui" if batprojtreat is True else "Non")
 
-    egidextfilter_input = input("Filtrer les EGID > 500000000 [oui (défaut) | non]: ")
-    egidextfilter = False if egidextfilter_input == "non" else True
-    print("Oui" if egidextfilter is True else "Non")
+        egidextfilter_input = input("Filtrer les EGID > 500000000 [oui (défaut) | non]: ")
+        egidextfilter = False if egidextfilter_input == "non" else True
+        print("Oui" if egidextfilter is True else "Non")
+
+    elif len(sys.argv) > 1 and sys.argv[1] == "--auto":
+        environ = "INTER"
+        batprojtreat = True
+        egidextfilter = True
+        print("Filtrer les EGID > 500000000 [oui (défaut) | non]: " + environ)
+        print("Filtrer les batiments projetés [oui (défaut) | non]: Oui" if batprojtreat is True else "Non")
+        print("Filtrer les EGID > 500000000 [oui (défaut) | non]: Oui" if egidextfilter is True else "Non")
+
+    else:
+        raise ValueError("Invalid parameters ")
 
     # get feedback for canton de Neuchâtel
     communes_ofs = utils.loadCommunesOFS()
@@ -50,7 +62,8 @@ if __name__ == "__main__":
 
     with open(feedback_filepath, "w", newline="") as csvfile:
         csv_fieldnames = [f"Liste_{i+1}" for i in range(6)]
-        csv_fieldnames.insert(0, "Commune")
+        csv_fieldnames.insert(0, "Commune_id")
+        csv_fieldnames.insert(1, "Commune")
         csv_fieldnames.append("Issue_22")
         # csv_fieldnames = ["Commune", [f"Liste_{i+1}" for i in range(6)], "Issue_22"]
         writer = csv.DictWriter(csvfile, fieldnames=csv_fieldnames, delimiter=";")
@@ -68,7 +81,7 @@ if __name__ == "__main__":
 
         # do the same for the canton
         print("Canton de Neuchâtel")
-        (feedback_commune_filepath, feedback_commune, nb_errors_by_list) = utils.generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", log=False)
+        (feedback_commune_filepath, feedback_commune, nb_errors_by_list) = utils.generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTRA", log=False)
         csvfile = writer.writerow(nb_errors_by_list)
 
     # print output path to copy and paste in browser

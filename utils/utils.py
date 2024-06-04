@@ -209,6 +209,23 @@ def _createExcelTable(ws, table_name, ref):
     return
 
 
+def _tableTitleGenerator(ws, sectionTitle, tableHeader, line_idx):
+    line_idx += 1
+
+    ws.cell(line_idx, 1).value = sectionTitle
+    ws.cell(line_idx, 1).style = "Headline 1"
+
+    line_idx += 1
+    table_start_row = line_idx
+
+    for i, header in enumerate(tableHeader):
+        ws.cell(line_idx, i + 1).value = header
+
+    line_idx += 1
+
+    return line_idx, table_start_row
+
+
 def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath, issue22_list, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", egidextfilter=True, log=False):
     # copy canton_file to commune_file
     feedback_commune_filename = "_".join([str(commune_id), commune_name.replace(" ", "_"), "feedback", today]) + ".xlsx"
@@ -216,6 +233,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     shutil.copy2(feedback_canton_filepath, feedback_commune_filepath)
 
     nb_errors_by_list = {}
+    nb_errors_by_list["Commune_id"] = commune_id
     nb_errors_by_list["Commune"] = commune_name
 
     feedback_commune = {"commune_id": commune_id, "commune_nom": commune_name}
@@ -307,25 +325,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     ws = wb["Liste 1"]
     ws_line_i = _findRowIndex(ws, commune_id, column_id=2, limit=1e4, egidextfilter=egidextfilter)
 
+    table_start_row = None
+
     if ws_line_i is not None:
-        ws2_line_i += 1
-
-        ws2.cell(ws2_line_i, 1).value = "LISTE 1 - Bâtiments sans coordonnées"
-        ws2.cell(ws2_line_i, 1).style = "Headline 1"
-
-        ws2_line_i += 1
-        table_start_row = ws2_line_i
-
-        ws2.cell(ws2_line_i, 1).value = "EGID"
-        ws2.cell(ws2_line_i, 2).value = "STRNAME"
-        ws2.cell(ws2_line_i, 3).value = "DEINR"
-        ws2.cell(ws2_line_i, 4).value = "PLZ4"
-        ws2.cell(ws2_line_i, 5).value = "PLZNAME"
-
-        ws2_line_i += 1
-
         while ws.cell(ws_line_i, 2).value is not None:
             if ws.cell(ws_line_i, 2).value == commune_id and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+                if table_start_row is None:
+                    tableHeader = ["EGID", "STRNAME", "DEINR", "PLZ4", "PLZNAME"]
+                    ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 1 - Bâtiments sans coordonnées", tableHeader, ws2_line_i)
+
                 ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
                 ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 11).value
                 ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 12).value
@@ -337,11 +345,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(5) + str(table_end_row)
-            _createExcelTable(ws2, "Liste1", ref)
 
-    nb_errors_by_list["Liste_1"] = table_end_row - table_start_row
+    if table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(5) + str(table_end_row)
+        _createExcelTable(ws2, "Liste1", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Liste_1"] = 0
+    else:
+        nb_errors_by_list["Liste_1"] = table_end_row - table_start_row
     if log:
         print("Liste 1 - end")
 
@@ -353,24 +365,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     ws = wb["Liste 2"]
     ws_line_i = _findRowIndex(ws, commune_id, column_id=2, limit=1e4, egidextfilter=egidextfilter)
 
+    table_start_row = None
+
     if ws_line_i is not None:
-        ws2_line_i += 1
-
-        ws2.cell(ws2_line_i, 1).value = "LISTE 2 - Coordonnées en dehors de la commune"
-        ws2.cell(ws2_line_i, 1).style = "Headline 1"
-
-        ws2_line_i += 1
-        table_start_row = ws2_line_i
-
-        ws2.cell(ws2_line_i, 1).value = "EGID"
-        ws2.cell(ws2_line_i, 2).value = "Adresse"
-        ws2.cell(ws2_line_i, 3).value = "GKODE"
-        ws2.cell(ws2_line_i, 4).value = "GKODN"
-
-        ws2_line_i += 1
-
         while ws.cell(ws_line_i, 2).value is not None:
-            if ws.cell(ws_line_i, 2).value == commune_id and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 19).value != "En travail" and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+                if table_start_row is None:
+                    tableHeader = ["EGID", "Adresse", "GKODE", "GKODN"]
+                    ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 2 - Coordonnées en dehors de la commune", tableHeader, ws2_line_i)
+
                 ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
                 ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 11).value, ws.cell(ws_line_i, 12).value)
                 ws2.cell(ws2_line_i, 1).style = "Hyperlink"
@@ -383,11 +386,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(4) + str(table_end_row)
-            _createExcelTable(ws2, "Liste2", ref)
 
-    nb_errors_by_list["Liste_2"] = table_end_row - table_start_row
+    if table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(4) + str(table_end_row)
+        _createExcelTable(ws2, "Liste2", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Liste_2"] = 0
+    else:
+        nb_errors_by_list["Liste_2"] = table_end_row - table_start_row
     if log:
         print("Liste 2 - end")
 
@@ -399,25 +406,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     ws = wb["Liste 3"]
     ws_line_i = _findRowIndex(ws, commune_id, column_id=2, limit=1e4, egidextfilter=egidextfilter)
 
+    table_start_row = None
+
     if ws_line_i is not None:
-        ws2_line_i += 1
-
-        ws2.cell(ws2_line_i, 1).value = "LISTE 3 - Divergence de NPA"
-        ws2.cell(ws2_line_i, 1).style = "Headline 1"
-
-        ws2_line_i += 1
-        table_start_row = ws2_line_i
-
-        ws2.cell(ws2_line_i, 1).value = "EGID"
-        ws2.cell(ws2_line_i, 2).value = "PLZ4 RegBL"
-        ws2.cell(ws2_line_i, 3).value = "PLZ4_Name RegBL"
-        ws2.cell(ws2_line_i, 4).value = "PLZ4 MO"
-        ws2.cell(ws2_line_i, 5).value = "PLZ4_Name MO"
-
-        ws2_line_i += 1
-
         while ws.cell(ws_line_i, 2).value is not None:
-            if ws.cell(ws_line_i, 2).value == commune_id and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 27).value != "En travail" and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+                if table_start_row is None:
+                    tableHeader = ["EGID", "PLZ4 RegBL", "PLZ4_Name RegBL", "PLZ4 MO", "PLZ4_Name MO"]
+                    ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 3 - Divergence de NPA", tableHeader, ws2_line_i)
+
                 ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
                 ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 20).value, ws.cell(ws_line_i, 21).value)
                 ws2.cell(ws2_line_i, 1).style = "Hyperlink"
@@ -431,11 +428,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(5) + str(table_end_row)
-            _createExcelTable(ws2, "Liste3", ref)
 
-    nb_errors_by_list["Liste_3"] = table_end_row - table_start_row
+    if table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(5) + str(table_end_row)
+        _createExcelTable(ws2, "Liste3", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Liste_3"] = 0
+    else:
+        nb_errors_by_list["Liste_3"] = table_end_row - table_start_row
     if log:
         print("Liste 3 - end")
 
@@ -447,29 +448,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     ws = wb["Liste 4"]
     ws_line_i = _findRowIndex(ws, commune_id, column_id=2, limit=1e4, egidextfilter=egidextfilter)
 
+    table_start_row = None
+
     if ws_line_i is not None:
-        ws2_line_i += 1
-
-        ws2.cell(ws2_line_i, 1).value = "LISTE 4 - Doublets d'adresses"
-        ws2.cell(ws2_line_i, 1).style = "Headline 1"
-
-        ws2_line_i += 1
-        table_start_row = ws2_line_i
-
-        ws2.cell(ws2_line_i, 1).value = "EGID"
-        ws2.cell(ws2_line_i, 2).value = "GKAT"
-        ws2.cell(ws2_line_i, 3).value = "GPARZ"
-        ws2.cell(ws2_line_i, 4).value = "GEBNR"
-        ws2.cell(ws2_line_i, 5).value = "STRNAME"
-        ws2.cell(ws2_line_i, 6).value = "DEINR"
-        ws2.cell(ws2_line_i, 7).value = "PLZ4"
-        ws2.cell(ws2_line_i, 8).value = "GBEZ"
-        ws2.cell(ws2_line_i, 9).value = "BUR / REE"
-
-        ws2_line_i += 1
-
         while ws.cell(ws_line_i, 2).value is not None:
-            if ws.cell(ws_line_i, 2).value == commune_id and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 26).value != "En travail" and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+                if table_start_row is None:
+                    tableHeader = ["EGID", "GKAT", "GPARZ", "GEBNR", "STRNAME", "DEINR", "PLZ4", "GBEZ", "BUR / REE"]
+                    ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 4 - Doublets d'adresses", tableHeader, ws2_line_i)
+
                 ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
                 ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 7).value, ws.cell(ws_line_i, 8).value)
                 ws2.cell(ws2_line_i, 1).style = "Hyperlink"
@@ -487,11 +474,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(9) + str(table_end_row)
-            _createExcelTable(ws2, "Liste4", ref)
 
-    nb_errors_by_list["Liste_4"] = table_end_row - table_start_row
+    if table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(9) + str(table_end_row)
+        _createExcelTable(ws2, "Liste4", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Liste_4"] = 0
+    else:
+        nb_errors_by_list["Liste_4"] = table_end_row - table_start_row
     if log:
         print("Liste 4 - end")
 
@@ -503,28 +494,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     ws = wb["Liste 5"]
     ws_line_i = _findRowIndex(ws, commune_id, column_id=2, limit=1e4, egidextfilter=egidextfilter)
 
+    table_start_row = None
+
     if ws_line_i is not None:
-        ws2_line_i += 1
-
-        ws2.cell(ws2_line_i, 1).value = "LISTE 5 - Définition du bâtiment"
-        ws2.cell(ws2_line_i, 1).style = "Headline 1"
-
-        ws2_line_i += 1
-        table_start_row = ws2_line_i
-
-        ws2.cell(ws2_line_i, 1).value = "EGID"
-        ws2.cell(ws2_line_i, 2).value = "GKAT"
-        ws2.cell(ws2_line_i, 3).value = "GKLAS"
-        ws2.cell(ws2_line_i, 4).value = "GSTAT"
-        ws2.cell(ws2_line_i, 5).value = "GKODE"
-        ws2.cell(ws2_line_i, 6).value = "GKODN"
-        ws2.cell(ws2_line_i, 7).value = "ISSUE"
-        ws2.cell(ws2_line_i, 8).value = "RESOLUTION_SGRF"
-
-        ws2_line_i += 1
-
         while ws.cell(ws_line_i, 2).value is not None:
-            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 13).value != "bat_proj" and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 13).value != "bat_proj" and ws.cell(ws_line_i, 14).value != "En travail" and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+                if table_start_row is None:
+                    tableHeader = ["EGID", "GKAT", "GKLAS", "GSTAT", "GKODE", "GKODN", "ISSUE", "RESOLUTION_SGRF"]
+                    ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 5 - Définition du bâtiment", tableHeader, ws2_line_i)
+
                 ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
                 (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
                 ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
@@ -542,11 +520,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(8) + str(table_end_row)
-            _createExcelTable(ws2, "Liste5", ref)
 
-    nb_errors_by_list["Liste_5"] = table_end_row - table_start_row
+    if table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(8) + str(table_end_row)
+        _createExcelTable(ws2, "Liste5", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Liste_5"] = 0
+    else:
+        nb_errors_by_list["Liste_5"] = table_end_row - table_start_row
     if log:
         print("Liste 5 - end")
 
@@ -558,28 +540,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     ws = wb["Liste 6"]
     ws_line_i = _findRowIndex(ws, commune_id, column_id=2, limit=1e4, egidextfilter=egidextfilter)
 
+    table_start_row = None
+
     if ws_line_i is not None:
-        ws2_line_i += 1
-
-        ws2.cell(ws2_line_i, 1).value = "Liste 6 - Catégorie du bâtiment"
-        ws2.cell(ws2_line_i, 1).style = "Headline 1"
-
-        ws2_line_i += 1
-        table_start_row = ws2_line_i
-
-        ws2.cell(ws2_line_i, 1).value = "EGID"
-        ws2.cell(ws2_line_i, 2).value = "GKAT"
-        ws2.cell(ws2_line_i, 3).value = "GKLAS"
-        ws2.cell(ws2_line_i, 4).value = "GSTAT"
-        ws2.cell(ws2_line_i, 5).value = "GKODE"
-        ws2.cell(ws2_line_i, 6).value = "GKODN"
-        ws2.cell(ws2_line_i, 7).value = "ISSUE"
-        ws2.cell(ws2_line_i, 8).value = "RESOLUTION_SGRF"
-
-        ws2_line_i += 1
-
         while ws.cell(ws_line_i, 2).value is not None:
-            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 13).value != "bat_proj" and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 13).value != "bat_proj" and ws.cell(ws_line_i, 14).value != "En travail" and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+                if table_start_row is None:
+                    tableHeader = ["EGID", "GKAT", "GKLAS", "GSTAT", "GKODE", "GKODN", "ISSUE", "RESOLUTION_SGRF"]
+                    ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "Liste 6 - Catégorie du bâtiment", tableHeader, ws2_line_i)
+
                 ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
                 (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
                 ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
@@ -597,11 +566,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(8) + str(table_end_row)
-            _createExcelTable(ws2, "Liste6", ref)
 
-    nb_errors_by_list["Liste_6"] = table_end_row - table_start_row
+    if table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(8) + str(table_end_row)
+        _createExcelTable(ws2, "Liste6", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Liste_6"] = 0
+    else:
+        nb_errors_by_list["Liste_6"] = table_end_row - table_start_row
     if log:
         print("Liste 6 - end")
 
@@ -641,11 +614,15 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
 
     if anyI22 is True:
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(4) + str(table_end_row)
-            _createExcelTable(ws2, "issue22", ref)
 
-    nb_errors_by_list["Issue_22"] = table_end_row - table_start_row
+    if anyI22 is True and table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(4) + str(table_end_row)
+        _createExcelTable(ws2, "issue22", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Issue_22"] = 0
+    else:
+        nb_errors_by_list["Issue_22"] = table_end_row - table_start_row
     if log:
         print("Issue 22 - end")
 
@@ -665,11 +642,14 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
 
 def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", log=False):
     # copy canton_file to commune_file
-    feedback_commune_filename = "_".join(["Canton_de_Neuchâtel", "SGRF", "feedback", today]) + ".xlsx"
+    # feedback_commune_filename = "_".join(["Canton_de_Neuchâtel", "SGRF", "feedback", today]) + ".xlsx"
+    feedback_commune_filename = "_".join(["0", "Canton_de_Neuchâtel", "feedback", today]) + ".xlsx"
+
     feedback_commune_filepath = os.path.join(os.environ["FEEDBACK_COMMUNES_WORKING_DIR"], today, feedback_commune_filename)
     shutil.copy2(feedback_canton_filepath, feedback_commune_filepath)
 
     nb_errors_by_list = {}
+    nb_errors_by_list["Commune_id"] = 0
     nb_errors_by_list["Commune"] = "Canton de Neuchâtel"
 
     feedback_commune = {"commune_id": 0, "commune_nom": "Canton de Neuchâtel"}
@@ -711,26 +691,15 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
     ws = wb["Liste 1"]
     ws_line_i = 7
 
+    table_start_row = None
+
     if ws_line_i is not None:
-        ws2_line_i += 1
-
-        ws2.cell(ws2_line_i, 1).value = "LISTE 1 - Bâtiments sans coordonnées"
-        ws2.cell(ws2_line_i, 1).style = "Headline 1"
-
-        ws2_line_i += 1
-        table_start_row = ws2_line_i
-
-        ws2.cell(ws2_line_i, 1).value = "COMMUNE"
-        ws2.cell(ws2_line_i, 2).value = "EGID"
-        ws2.cell(ws2_line_i, 3).value = "STRNAME"
-        ws2.cell(ws2_line_i, 4).value = "DEINR"
-        ws2.cell(ws2_line_i, 5).value = "PLZ4"
-        ws2.cell(ws2_line_i, 6).value = "PLZNAME"
-
-        ws2_line_i += 1
-
         while ws.cell(ws_line_i, 2).value is not None:
             if ws.cell(ws_line_i, 4).value >= 500000000:
+                if table_start_row is None:
+                    tableHeader = ["COMMUNE", "EGID", "STRNAME", "DEINR", "PLZ4", "PLZNAME"]
+                    ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 1 - Bâtiments sans coordonnées", tableHeader, ws2_line_i)
+
                 ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
                 ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
                 ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 11).value
@@ -743,11 +712,15 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(6) + str(table_end_row)
-            _createExcelTable(ws2, "Liste1", ref)
 
-    nb_errors_by_list["Liste_1"] = table_end_row - table_start_row
+    if table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(6) + str(table_end_row)
+        _createExcelTable(ws2, "Liste1", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Liste_1"] = 0
+    else:
+        nb_errors_by_list["Liste_1"] = table_end_row - table_start_row
     if log:
         print("Liste 1 - end")
 
@@ -759,44 +732,38 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
     ws = wb["Liste 2"]
     ws_line_i = 7
 
+    table_start_row = None
+
     if ws_line_i is not None:
-        ws2_line_i += 1
-
-        ws2.cell(ws2_line_i, 1).value = "LISTE 2 - Coordonnées en dehors de la commune"
-        ws2.cell(ws2_line_i, 1).style = "Headline 1"
-
-        ws2_line_i += 1
-        table_start_row = ws2_line_i
-
-        ws2.cell(ws2_line_i, 1).value = "COMMUNE"
-        ws2.cell(ws2_line_i, 2).value = "EGID"
-        ws2.cell(ws2_line_i, 3).value = "Adresse"
-        ws2.cell(ws2_line_i, 4).value = "GKODE"
-        ws2.cell(ws2_line_i, 5).value = "GKODN"
-
-        ws2_line_i += 1
-
         while ws.cell(ws_line_i, 2).value is not None:
-            print("ws.cell(ws_line_i, 4).value =", ws.cell(ws_line_i, 4).value)
             if ws.cell(ws_line_i, 4).value and ws.cell(ws_line_i, 4).value >= 500000000:
+                if table_start_row is None:
+                    tableHeader = ["COMMUNE", "EGID", "Adresse", "GKODE", "ETAT_MO", "GKODN"]
+                    ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 2 - Coordonnées en dehors de la commune", tableHeader, ws2_line_i)
+
                 ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
                 ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
                 ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 11).value, ws.cell(ws_line_i, 12).value)
                 ws2.cell(ws2_line_i, 2).style = "Hyperlink"
                 ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 5).value
                 ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 11).value
-                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 12).value
+                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 19).value
+                ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 12).value
 
                 ws2_line_i += 1
 
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(5) + str(table_end_row)
-            _createExcelTable(ws2, "Liste2", ref)
 
-    nb_errors_by_list["Liste_2"] = table_end_row - table_start_row
+    if table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(6) + str(table_end_row)
+        _createExcelTable(ws2, "Liste2", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Liste_2"] = 0
+    else:
+        nb_errors_by_list["Liste_2"] = table_end_row - table_start_row
     if log:
         print("Liste 2 - end")
 
@@ -808,26 +775,15 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
     ws = wb["Liste 3"]
     ws_line_i = 7
 
+    table_start_row = None
+
     if ws_line_i is not None:
-        ws2_line_i += 1
-
-        ws2.cell(ws2_line_i, 1).value = "LISTE 3 - Divergence de NPA"
-        ws2.cell(ws2_line_i, 1).style = "Headline 1"
-
-        ws2_line_i += 1
-        table_start_row = ws2_line_i
-
-        ws2.cell(ws2_line_i, 1).value = "COMMUNE"
-        ws2.cell(ws2_line_i, 2).value = "EGID"
-        ws2.cell(ws2_line_i, 3).value = "PLZ4 RegBL"
-        ws2.cell(ws2_line_i, 4).value = "PLZ4_Name RegBL"
-        ws2.cell(ws2_line_i, 5).value = "PLZ4 MO"
-        ws2.cell(ws2_line_i, 6).value = "PLZ4_Name MO"
-
-        ws2_line_i += 1
-
         while ws.cell(ws_line_i, 2).value is not None:
             if ws.cell(ws_line_i, 4).value >= 500000000:
+                if table_start_row is None:
+                    tableHeader = ["COMMUNE", "EGID", "PLZ4 RegBL", "PLZ4_Name RegBL", "PLZ4 MO", "ETAT_MO", "PLZ4_Name MO"]
+                    ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 3 - Divergence de NPA", tableHeader, ws2_line_i)
+
                 ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
                 ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
                 ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 20).value, ws.cell(ws_line_i, 21).value)
@@ -835,18 +791,23 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
                 ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 8).value
                 ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 9).value
                 ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 11).value
-                ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 12).value
+                ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 27).value
+                ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 12).value
 
                 ws2_line_i += 1
 
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(6) + str(table_end_row)
-            _createExcelTable(ws2, "Liste3", ref)
 
-    nb_errors_by_list["Liste_3"] = table_end_row - table_start_row
+    if table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(7) + str(table_end_row)
+        _createExcelTable(ws2, "Liste3", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Liste_3"] = 0
+    else:
+        nb_errors_by_list["Liste_3"] = table_end_row - table_start_row
     if log:
         print("Liste 3 - end")
 
@@ -858,30 +819,15 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
     ws = wb["Liste 4"]
     ws_line_i = 7
 
+    table_start_row = None
+
     if ws_line_i is not None:
-        ws2_line_i += 1
-
-        ws2.cell(ws2_line_i, 1).value = "LISTE 4 - Doublets d'adresses"
-        ws2.cell(ws2_line_i, 1).style = "Headline 1"
-
-        ws2_line_i += 1
-        table_start_row = ws2_line_i
-
-        ws2.cell(ws2_line_i, 1).value = "COMMUNE"
-        ws2.cell(ws2_line_i, 2).value = "EGID"
-        ws2.cell(ws2_line_i, 3).value = "GKAT"
-        ws2.cell(ws2_line_i, 4).value = "GPARZ"
-        ws2.cell(ws2_line_i, 5).value = "GEBNR"
-        ws2.cell(ws2_line_i, 6).value = "STRNAME"
-        ws2.cell(ws2_line_i, 7).value = "DEINR"
-        ws2.cell(ws2_line_i, 8).value = "PLZ4"
-        ws2.cell(ws2_line_i, 9).value = "GBEZ"
-        ws2.cell(ws2_line_i, 10).value = "BUR / REE"
-
-        ws2_line_i += 1
-
         while ws.cell(ws_line_i, 2).value is not None:
             if ws.cell(ws_line_i, 4).value >= 500000000:
+                if table_start_row is None:
+                    tableHeader = ["COMMUNE", "EGID", "GKAT", "GPARZ", "GEBNR", "STRNAME", "DEINR", "PLZ4", "GBEZ", "ETAT_MO", "BUR / REE"]
+                    ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 4 - Doublets d'adresses", tableHeader, ws2_line_i)
+
                 ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
                 ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
                 ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 7).value, ws.cell(ws_line_i, 8).value)
@@ -893,18 +839,23 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
                 ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 12).value
                 ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 13).value
                 ws2.cell(ws2_line_i, 9).value = ws.cell(ws_line_i, 14).value
-                ws2.cell(ws2_line_i, 10).value = ws.cell(ws_line_i, 24).value
+                ws2.cell(ws2_line_i, 10).value = ws.cell(ws_line_i, 26).value
+                ws2.cell(ws2_line_i, 11).value = ws.cell(ws_line_i, 24).value
 
                 ws2_line_i += 1
 
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(10) + str(table_end_row)
-            _createExcelTable(ws2, "Liste4", ref)
 
-    nb_errors_by_list["Liste_4"] = table_end_row - table_start_row
+    if table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(11) + str(table_end_row)
+        _createExcelTable(ws2, "Liste4", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Liste_4"] = 0
+    else:
+        nb_errors_by_list["Liste_4"] = table_end_row - table_start_row
     if log:
         print("Liste 4 - end")
 
@@ -916,29 +867,15 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
     ws = wb["Liste 5"]
     ws_line_i = 7
 
+    table_start_row = None
+
     if ws_line_i is not None:
-        ws2_line_i += 1
-
-        ws2.cell(ws2_line_i, 1).value = "LISTE 5 - Définition du bâtiment"
-        ws2.cell(ws2_line_i, 1).style = "Headline 1"
-
-        ws2_line_i += 1
-        table_start_row = ws2_line_i
-
-        ws2.cell(ws2_line_i, 1).value = "COMMUNE"
-        ws2.cell(ws2_line_i, 2).value = "EGID"
-        ws2.cell(ws2_line_i, 3).value = "GKAT"
-        ws2.cell(ws2_line_i, 4).value = "GKLAS"
-        ws2.cell(ws2_line_i, 5).value = "GSTAT"
-        ws2.cell(ws2_line_i, 6).value = "GKODE"
-        ws2.cell(ws2_line_i, 7).value = "GKODN"
-        ws2.cell(ws2_line_i, 8).value = "ISSUE"
-        ws2.cell(ws2_line_i, 9).value = "RESOLUTION_SGRF"
-
-        ws2_line_i += 1
-
         while ws.cell(ws_line_i, 2).value is not None:
             if ws.cell(ws_line_i, 4).value >= 500000000:
+                if table_start_row is None:
+                    tableHeader = ["COMMUNE", "EGID", "GKAT", "GKLAS", "GSTAT", "GKODE", "GKODN", "ISSUE", "ETAT_MO", "RESOLUTION_SGRF"]
+                    ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 5 - Définition du bâtiment", tableHeader, ws2_line_i)
+
                 ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
                 ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
                 (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
@@ -950,18 +887,23 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
                 ws2.cell(ws2_line_i, 6).value = coord_e
                 ws2.cell(ws2_line_i, 7).value = coord_n
                 ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 12).value
-                ws2.cell(ws2_line_i, 9).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
+                ws2.cell(ws2_line_i, 9).value = ws.cell(ws_line_i, 14).value
+                ws2.cell(ws2_line_i, 10).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
 
                 ws2_line_i += 1
 
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(9) + str(table_end_row)
-            _createExcelTable(ws2, "Liste5", ref)
 
-    nb_errors_by_list["Liste_5"] = table_end_row - table_start_row
+    if table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(10) + str(table_end_row)
+        _createExcelTable(ws2, "Liste5", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Liste_5"] = 0
+    else:
+        nb_errors_by_list["Liste_5"] = table_end_row - table_start_row
     if log:
         print("Liste 5 - end")
 
@@ -973,29 +915,15 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
     ws = wb["Liste 6"]
     ws_line_i = 7
 
+    table_start_row = None
+
     if ws_line_i is not None:
-        ws2_line_i += 1
-
-        ws2.cell(ws2_line_i, 1).value = "Liste 6 - Catégorie du bâtiment"
-        ws2.cell(ws2_line_i, 1).style = "Headline 1"
-
-        ws2_line_i += 1
-        table_start_row = ws2_line_i
-
-        ws2.cell(ws2_line_i, 1).value = "COMMUNE"
-        ws2.cell(ws2_line_i, 2).value = "EGID"
-        ws2.cell(ws2_line_i, 3).value = "GKAT"
-        ws2.cell(ws2_line_i, 4).value = "GKLAS"
-        ws2.cell(ws2_line_i, 5).value = "GSTAT"
-        ws2.cell(ws2_line_i, 6).value = "GKODE"
-        ws2.cell(ws2_line_i, 7).value = "GKODN"
-        ws2.cell(ws2_line_i, 8).value = "ISSUE"
-        ws2.cell(ws2_line_i, 9).value = "RESOLUTION_SGRF"
-
-        ws2_line_i += 1
-
         while ws.cell(ws_line_i, 2).value is not None:
             if ws.cell(ws_line_i, 4).value >= 500000000:
+                if table_start_row is None:
+                    tableHeader = ["COMMUNE", "EGID", "GKAT", "GKLAS", "GSTAT", "GKODE", "GKODN", "ISSUE", "ETAT_MO", "RESOLUTION_SGRF"]
+                    ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "Liste 6 - Catégorie du bâtiment", tableHeader, ws2_line_i)
+
                 ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
                 ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
                 (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
@@ -1007,18 +935,23 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
                 ws2.cell(ws2_line_i, 6).value = coord_e
                 ws2.cell(ws2_line_i, 7).value = coord_n
                 ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 12).value
-                ws2.cell(ws2_line_i, 9).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
+                ws2.cell(ws2_line_i, 9).value = ws.cell(ws_line_i, 14).value
+                ws2.cell(ws2_line_i, 10).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
 
                 ws2_line_i += 1
 
             ws_line_i += 1
 
         table_end_row = ws2_line_i - 1
-        if table_end_row > table_start_row:
-            ref = "A" + str(table_start_row) + ":" + get_column_letter(9) + str(table_end_row)
-            _createExcelTable(ws2, "Liste6", ref)
 
-    nb_errors_by_list["Liste_6"] = table_end_row - table_start_row
+    if table_start_row is not None and table_end_row > table_start_row:
+        ref = "A" + str(table_start_row) + ":" + get_column_letter(10) + str(table_end_row)
+        _createExcelTable(ws2, "Liste6", ref)
+
+    if table_start_row is None:
+        nb_errors_by_list["Liste_6"] = 0
+    else:
+        nb_errors_by_list["Liste_6"] = table_end_row - table_start_row
     if log:
         print("Liste 6 - end")
 

@@ -93,8 +93,8 @@ if __name__ == "__main__":
                         "NB_ERROR_LIST_5": row[6],
                         "NB_ERROR_LIST_6": row[7],
                         "NB_ERROR_ISSUE_22": row[8],
-                        "ADMINISTRATOR_NAME": os.getenv["MAIL_COMMUNE_ADMINISTRATOR_NAME"],
-                        "ADMINISTRATOR_EMAIL": os.getenv["MAIL_COMMUNE_ADMINISTRATOR_EMAIL"],
+                        "ADMINISTRATOR_NAME": os.getenv("MAIL_COMMUNE_ADMINISTRATOR_NAME"),
+                        "ADMINISTRATOR_EMAIL": os.getenv("MAIL_COMMUNE_ADMINISTRATOR_EMAIL"),
                     }
 
                     # remlpir le template

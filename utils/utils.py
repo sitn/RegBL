@@ -370,7 +370,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
 
     if ws_line_i is not None:
         while ws.cell(ws_line_i, 2).value is not None:
-            if ws.cell(ws_line_i, 2).re.search("En travail", ws.cell(ws_line_i, earch).value, re.IGNORECASE)(ws_line_i, 19).value, re.IGNORECASE) and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and re.search("En travail", ws.cell(ws_line_i, 19).value, re.IGNORECASE) and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
                 if table_start_row is None:
                     tableHeader = ["EGID", "Adresse", "GKODE", "GKODN"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 2 - Coordonnées en dehors de la commune", tableHeader, ws2_line_i)

@@ -11,7 +11,7 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 
-load_dotenv(r".env")
+load_dotenv(override=True)
 
 
 dt = datetime.strftime(datetime.now(), "%Y%m%d")

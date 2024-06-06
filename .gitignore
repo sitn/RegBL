@@ -134,3 +134,6 @@ dmypy.json
 
 # recover files
 *.recover
+
+# production of data
+data_producted/

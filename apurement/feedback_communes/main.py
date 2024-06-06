@@ -77,7 +77,6 @@ if __name__ == "__main__":
             print(commune_id, communes_ofs[commune_id])
             (feedback_commune_filepath, feedback_commune, nb_errors_by_list) = utils.generateCommuneErrorFile(commune_id, communes_ofs[commune_id], feedback_canton_filepath, issue22_list, issue_solution, today, environ, egidextfilter, log=False)
 
-            break
             csvfile = writer.writerow(nb_errors_by_list)
 
         # do the same for the canton

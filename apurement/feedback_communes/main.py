@@ -18,7 +18,7 @@ load_dotenv(r".\.env")
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         # get arguments
-        environ_input = input("Filtrer les EGID > 500000000 [oui (défaut) | non]:")
+        environ_input = input("internet ou intranet [INTER | INTRA (défaut)]: ")
         environ = "INTER" if environ_input == "inter" else "INTRA"
         print(environ)
 
@@ -34,9 +34,9 @@ if __name__ == "__main__":
         environ = "INTER"
         batprojtreat = True
         egidextfilter = True
-        print("Filtrer les EGID > 500000000 [oui (défaut) | non]: " + environ)
-        print("Filtrer les batiments projetés [oui (défaut) | non]: Oui" if batprojtreat is True else "Non")
-        print("Filtrer les EGID > 500000000 [oui (défaut) | non]: Oui" if egidextfilter is True else "Non")
+        print("internet ou intranet [INTER | INTRA (défaut)]: " + environ)
+        print("Filtrer les batiments projetés [oui (défaut) | non]: " + ("Oui" if batprojtreat is True else "Non"))
+        print("Filtrer les EGID > 500000000 [oui (défaut) | non]: " + ("Oui" if egidextfilter is True else "Non"))
 
     else:
         raise ValueError("Invalid parameters ")

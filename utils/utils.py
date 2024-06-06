@@ -4,6 +4,7 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 from datetime import datetime
 import requests
 import os
+import re
 import shutil
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -369,7 +370,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
 
     if ws_line_i is not None:
         while ws.cell(ws_line_i, 2).value is not None:
-            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 19).value != "En travail" and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).re.search("En travail", ws.cell(ws_line_i, earch).value, re.IGNORECASE)(ws_line_i, 19).value, re.IGNORECASE) and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
                 if table_start_row is None:
                     tableHeader = ["EGID", "Adresse", "GKODE", "GKODN"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 2 - Coordonnées en dehors de la commune", tableHeader, ws2_line_i)
@@ -410,7 +411,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
 
     if ws_line_i is not None:
         while ws.cell(ws_line_i, 2).value is not None:
-            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 27).value != "En travail" and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and re.search("En travail", ws.cell(ws_line_i, 27).value, re.IGNORECASE) and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
                 if table_start_row is None:
                     tableHeader = ["EGID", "PLZ4 RegBL", "PLZ4_Name RegBL", "PLZ4 MO", "PLZ4_Name MO"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 3 - Divergence de NPA", tableHeader, ws2_line_i)
@@ -452,7 +453,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
 
     if ws_line_i is not None:
         while ws.cell(ws_line_i, 2).value is not None:
-            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 26).value != "En travail" and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and re.search("En travail", ws.cell(ws_line_i, 26).value, re.IGNORECASE) and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
                 if table_start_row is None:
                     tableHeader = ["EGID", "GKAT", "GPARZ", "GEBNR", "STRNAME", "DEINR", "PLZ4", "GBEZ", "BUR / REE"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 4 - Doublets d'adresses", tableHeader, ws2_line_i)
@@ -498,7 +499,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
 
     if ws_line_i is not None:
         while ws.cell(ws_line_i, 2).value is not None:
-            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 13).value != "bat_proj" and ws.cell(ws_line_i, 14).value != "En travail" and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 13).value != "bat_proj" and re.search("En travail", ws.cell(ws_line_i, 14).value, re.IGNORECASE) and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
                 if table_start_row is None:
                     tableHeader = ["EGID", "GKAT", "GKLAS", "GSTAT", "GKODE", "GKODN", "ISSUE", "RESOLUTION_SGRF"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 5 - Définition du bâtiment", tableHeader, ws2_line_i)
@@ -544,7 +545,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
 
     if ws_line_i is not None:
         while ws.cell(ws_line_i, 2).value is not None:
-            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 13).value != "bat_proj" and ws.cell(ws_line_i, 14).value != "En travail" and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 13).value != "bat_proj" and re.search("En travail", ws.cell(ws_line_i, 14).value, re.IGNORECASE) and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
                 if table_start_row is None:
                     tableHeader = ["EGID", "GKAT", "GKLAS", "GSTAT", "GKODE", "GKODN", "ISSUE", "RESOLUTION_SGRF"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "Liste 6 - Catégorie du bâtiment", tableHeader, ws2_line_i)

@@ -9,11 +9,13 @@
             margin: 0;
             font-family: Arial, sans-serif;
         }
-        header, footer {
+        .header, .footer {
             background-color: #add8e6; /* Bleu pâle */
             color: #333;
             padding: 20px;
             text-align: center;
+            padding-top: 1.3em;
+            padding-bottom: 1.3em;
         }
         main {
             padding: 10px 20px 10px 20px;
@@ -29,29 +31,44 @@
     </style>
 </head>
 <body>
-    <header>
+    <div class="header">
         <h1>RegBL - apurement des données</h1>
-    </header>
+    </div>
 
     <main>
         <!-- Espace pour des communications -->
+		<p style="font-style: italic; margin-bottom: 30px;">Au personnel des communes en charge du RegBL</p>
         <p style="margin-bottom: 30px;">Commune: <span style="font-weight: bold;">{{ COMMUNE_NAME }}</span></p>
-        <p>Bonjour,</p>
-        <p>Vous trouverez ci-joint la liste des erreurs du RegBL pour votre commune. Cette liste est générée sur la base des données de l'OFS et complétée par le SGRF avec des commentaires pour vous aider à les traiter.</p>
+		<p style="margin-top: 40px;">Bonjour Madame, Monsieur,</p>
+		<p>Nous avons le plaisir de vous communiquer par ce mail quelques informations à propos de la mise à jour du RegBL et sur l’état du projet d’extension des données qui touche à sa fin.</p>
+
+
+		<p style="font-weight: bold; margin-top: 30px;">Apurement des données</p>
+		<p>Le service de la géomatique et du registre foncier (SGRF) a mis en place un outil d’aide pour le traitement des erreurs, basé sur les fichiers d’erreurs publiés chaque semaine par l’OFS. Le fichier annexé filtre les données de l’OFS en utilisant les données de la mensuration officielle (MO) et oriente l’opérateur du RegBL sur la façon de traiter l’erreur.</p>
         <p>
-            Voici un aperçu des erreurs:
+            Vous trouverez dans le fichier joint l’ensemble des erreurs organisées en 7 listes :
             <ul>
-                <li>Liste 1: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_1 }}</span> Bâtiments existants dans le RegBL sans coordonnées de bâtiment (sans les habitations provisoires)</li>
-                <li>Liste 2: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_2 }}</span> Bâtiments dont les coordonnées se situent en dehors des limites de la commune indiquée</li>
-                <li>Liste 3: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_3 }}</span> Incohérences entre les NPA issus du RegBL et ceux de la MO</li>
-                <li>Liste 4: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_4 }}</span> Entrées des bâtiments existants dans le RegBL ayant une adresse non univoques (sans les habitations provisoires)</li>
-                <li>Liste 5: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_5 }}</span> Incohérences dans la définition du bâtiment entre la MO et le RegBL</li>
-                <li>Liste 6: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_6 }}</span> Incohérences entre la catégorie du bâtiment (GKAT) du RegBL et la couche d'information de la MO</li>
-                <li>Bâtiments manquants: <span class="variable-space">{{ NB_ERROR_ISSUE_22 }}</span></li>
+                <li>Liste 1: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_1 }}</span> Bâtiments existants dans le RegBL sans coordonnées <span style="color: red;">=> ajouter les coordonnées du bâtiment</span></span></li>
+                <li>Liste 2: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_2 }}</span> Coordonnées en dehors de la commune indiquée <span style="color: red;">=> corriger les coordonnées du bâtiment</span></li>
+                <li>Liste 3: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_3 }}</span> Divergence de NPA <span style="color: red;">=> corriger l'adresse ou contacter le SGRF pour modifier la géométrie du NPA</span></li>
+                <li>Liste 4: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_4 }}</span> Doublets d'adresses <span style="color: red;">=> corriger pour que les adresses soient univoques</span></li>
+                <li>Liste 5: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_5 }}</span> Définition du bâtiment <span style="color: red;">=> corriger selon les indications du SGRF (dernière colonne)</span></li>
+                <li>Liste 6: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_6 }}</span> Catégorie du bâtiment <span style="color: red;">=> corriger selon les indications du SGRF (dernière colonne)</span></li>
+                <li>Bâtiments manquants: <span class="variable-space">{{ NB_ERROR_ISSUE_22 }}</span> <span style="color: red;">=> renseigner le b'atiment dans le RegBL</span></li>
             </ul>
+			<span style="font-style: italic;">Dans le cas où aucune erreur n’est constatée dans une liste, cette liste n’apparaît pas dans le fichier. Actuellement, par exemple, il n’y a aucune erreur dans les listes 1 à 3. </span>
         </p>
-        <p>Nous nous tenons volontiers à disposition pour tout complément.</p>
-        <p>Avec nos meilleures salutations,</p>
+		<p>Le SGRF prévoit de vous transmettre ces listes tous les premiers mercredis du mois, afin que vous puissiez effectuer les corrections nécessaires directement dans le registre.</p>
+
+
+		<p style="font-weight: bold; margin-top: 30px;">Extension du RegBL</p>
+		<p>Nous avons le plaisir de vous informer que le projet d’extensions du RegBL touche à sa fin. Avec votre appui et en croisant les données de la MO et de l’établissement cantonal d’assurance et de prévention (ECAP), ce sont plus de 20'000 bâtiments sans usage d’habitation qui ont pu être enregistrés sur tout le canton entre fin 2021 et 2024, les constructions à vocation d’habitation ne pouvant être ajoutées que par les communes. </p>
+		<p>Les caractéristiques des constructions (GKAT, GKLAS) ont été remplies à l’aide des informations de la MO. Les périodes de construction des bâtiments ont, quant à elles, été renseignées sur la base des données de l’ECAP ou sur l’analyse des cartes historiques de la confédération.</p>
+		<p>Si vous constatez des erreurs dans les données, vous pouvez les corriger directement dans le registre.</p>
+
+
+        <p>Je me tiens naturellement à disposition pour tout complément d'information.</p>
+        <p>En vous remerciant pour votre collaboration, je vous prie de recevoir, Madame, Monsieur, mes salutations les meilleures.</p>
         <p>Pour le SGRF, {{ ADMINISTRATOR_NAME }}</p>
         <p style="font-style: italic; font-size: small; margin-top: 40px;">
             Ne pas répondre à ce message, cette adresse e-mail n'est pas relevée.<br>
@@ -59,8 +76,8 @@
         </p>
     </main>
 
-    <footer>
+    <div class="footer">
         <p>Pour toute question : <a href="mailto:{{ ADMINISTRATOR_EMAIL }}">{{ ADMINISTRATOR_EMAIL }}</a></p>
-    </footer>
+    </div>
 </body>
 </html>

@@ -83,41 +83,43 @@ if __name__ == "__main__":
             if row[0].isnumeric():
                 total_error = sum([int(a) for a in row[2:]])
 
+                data_tpl = {
+                    "COMMUNE_NAME": row[1],
+                    "NB_ERROR_LIST_1": row[2],
+                    "NB_ERROR_LIST_2": row[3],
+                    "NB_ERROR_LIST_3": row[4],
+                    "NB_ERROR_LIST_4": row[5],
+                    "NB_ERROR_LIST_5": row[6],
+                    "NB_ERROR_LIST_6": row[7],
+                    "NB_ERROR_ISSUE_22": row[8],
+                    "ADMINISTRATOR_NAME": os.getenv("MAIL_COMMUNE_ADMINISTRATOR_NAME"),
+                    "ADMINISTRATOR_EMAIL": os.getenv("MAIL_COMMUNE_ADMINISTRATOR_EMAIL"),
+                }
+
+                # remlpir le template
+                email_content = jinja_tpl.render(data_tpl)
+
+                commune_id = row[0]
+                commune_name = row[1].replace(" ", "_")
+
+                attached_file = os.path.join(feedback_path, dt, f"{commune_id}_{commune_name}_feedback_{dt}.xlsx")
+                if not os.path.exists:
+                    attached_file = []
+
+                if int(commune_id) > 0:
+                    to = [mails[row[0]]]
+                    # continue
+                else:
+                    # Canton de neuchâtel
+                    to = [os.getenv("MAIL_ME")]
+
+                # envoyer le mail avec la pièce jointe si nécessaire
+                attached_files = None
                 if total_error > 0:
-                    data_tpl = {
-                        "COMMUNE_NAME": row[1],
-                        "NB_ERROR_LIST_1": row[2],
-                        "NB_ERROR_LIST_2": row[3],
-                        "NB_ERROR_LIST_3": row[4],
-                        "NB_ERROR_LIST_4": row[5],
-                        "NB_ERROR_LIST_5": row[6],
-                        "NB_ERROR_LIST_6": row[7],
-                        "NB_ERROR_ISSUE_22": row[8],
-                        "ADMINISTRATOR_NAME": os.getenv("MAIL_COMMUNE_ADMINISTRATOR_NAME"),
-                        "ADMINISTRATOR_EMAIL": os.getenv("MAIL_COMMUNE_ADMINISTRATOR_EMAIL"),
-                    }
+                    attached_files = [attached_file]
+                send_mail(to, "RegBL - apurement des données", email_content, files=attached_files)
 
-                    # remlpir le template
-                    email_content = jinja_tpl.render(data_tpl)
-
-                    commune_id = row[0]
-                    commune_name = row[1].replace(" ", "_")
-
-                    attached_file = os.path.join(feedback_path, dt, f"{commune_id}_{commune_name}_feedback_{dt}.xlsx")
-                    if not os.path.exists:
-                        attached_file = []
-
-                    if int(commune_id) > 0:
-                        to = [mails[row[0]]]
-                        # continue
-                    else:
-                        # Canton de neuchâtel
-                        to = [os.getenv("MAIL_ME")]
-
-                    # envoyer le mail avec la pièce jointe
-                    send_mail(to, "RegBL - apurement des données", email_content, files=[attached_file])
-
-                    mail_filename = f"{row[0]}_{row[1]}_{dt}_mail.html"
-                    mail_path = os.path.join(os.environ["FEEDBACK_COMMUNES_WORKING_DIR"], dt, mail_filename)
-                    with open(mail_path, "w", encoding="utf-8") as mail_file:
-                        mail_file.write(email_content)
+                mail_filename = f"{row[0]}_{row[1]}_{dt}_mail.html"
+                mail_path = os.path.join(os.environ["FEEDBACK_COMMUNES_WORKING_DIR"], dt, mail_filename)
+                with open(mail_path, "w", encoding="utf-8") as mail_file:
+                    mail_file.write(email_content)

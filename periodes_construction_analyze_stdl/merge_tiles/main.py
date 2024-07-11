@@ -2,10 +2,12 @@ from openpyxl import Workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from datetime import datetime
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-# working_dir = r"P:\GEON\MRU\RegBL\Résultats"
-working_dir = r"P:\GEON\MRU\RegBL\Résultats\2eme_passe"
+working_dir = os.getenv("PERIODE_CONSTRUCTION_ANALYZER_DIRECTORY")
 
 
 if __name__ == "__main__":

@@ -114,7 +114,7 @@ if __name__ == "__main__":
                     to = [os.getenv("MAIL_ME")]
 
                 # envoyer le mail avec la pièce jointe si nécessaire
-                attached_files = None
+                attached_files = []
                 if total_error > 0:
                     attached_files = [attached_file]
                 send_mail(to, "RegBL - apurement des données", email_content, files=attached_files)

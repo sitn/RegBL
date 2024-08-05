@@ -30,13 +30,14 @@ if __name__ == "__main__":
         egidextfilter = False if egidextfilter_input == "non" else True
         print("Oui" if egidextfilter is True else "Non")
 
-    elif len(sys.argv) > 1 and sys.argv[1] == "--auto":
-        environ = "INTER"
-        batprojtreat = True
-        egidextfilter = True
-        print("internet ou intranet [INTER | INTRA (défaut)]: " + environ)
-        print("Filtrer les batiments projetés [oui (défaut) | non]: " + ("Oui" if batprojtreat is True else "Non"))
-        print("Filtrer les EGID > 500000000 [oui (défaut) | non]: " + ("Oui" if egidextfilter is True else "Non"))
+    elif len(sys.argv) > 1:
+        if "--auto" in sys.argv:
+            environ = "INTER"
+            batprojtreat = True
+            egidextfilter = True
+            print("internet ou intranet [INTER | INTRA (défaut)]: " + environ)
+            print("Filtrer les batiments projetés [oui (défaut) | non]: " + ("Oui" if batprojtreat is True else "Non"))
+            print("Filtrer les EGID > 500000000 [oui (défaut) | non]: " + ("Oui" if egidextfilter is True else "Non"))
 
     else:
         raise ValueError("Invalid parameters ")

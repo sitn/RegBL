@@ -6,7 +6,7 @@ import smtplib
 from email.message import EmailMessage
 from email.utils import formatdate
 from email.mime.application import MIMEApplication
-import os
+import os, sys
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -67,6 +67,11 @@ def send_mail(to, subject, content, files=[]):
 
 
 if __name__ == "__main__":
+    # email de test
+    testemail = None
+    if "--testmail" in sys.argv:
+        testemail = sys.argv[sys.argv.index("--testmail") + 1]
+
 
     feedback_path = os.getenv("MAIL_COMMUNE_FEEDBACK_PATH")
     feedback_csv_path = os.path.join(feedback_path, dt, f"{dt}-feedback.csv")
@@ -96,7 +101,7 @@ if __name__ == "__main__":
                     "ADMINISTRATOR_EMAIL": os.getenv("MAIL_COMMUNE_ADMINISTRATOR_EMAIL"),
                 }
 
-                # remlpir le template
+                # remplir le template
                 email_content = jinja_tpl.render(data_tpl)
 
                 commune_id = row[0]
@@ -106,12 +111,16 @@ if __name__ == "__main__":
                 if not os.path.exists:
                     attached_file = []
 
-                if int(commune_id) > 0:
-                    to = [mails[row[0]]]
-                    # continue
+                # destinataire
+                if testemail is not None:
+                    to = [testemail]
                 else:
-                    # Canton de neuchâtel
-                    to = [os.getenv("MAIL_ME")]
+                    if int(commune_id) > 0:
+                        to = [mails[row[0]]]
+                        # continue
+                    else:
+                        # Canton de neuchâtel
+                        to = [os.getenv("MAIL_ME")]
 
                 # envoyer le mail avec la pièce jointe si nécessaire
                 attached_files = []

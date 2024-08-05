@@ -6,7 +6,7 @@ import smtplib
 from email.message import EmailMessage
 from email.utils import formatdate
 from email.mime.application import MIMEApplication
-import os, sys
+import os, re, sys
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -69,9 +69,8 @@ def send_mail(to, subject, content, files=[]):
 if __name__ == "__main__":
     # email de test
     testemail = None
-    if "--testmail" in sys.argv:
-        testemail = sys.argv[sys.argv.index("--testmail") + 1]
-
+    if "--testemail" in sys.argv:
+        testemail = sys.argv[sys.argv.index("--testemail") + 1]
 
     feedback_path = os.getenv("MAIL_COMMUNE_FEEDBACK_PATH")
     feedback_csv_path = os.path.join(feedback_path, dt, f"{dt}-feedback.csv")
@@ -113,7 +112,10 @@ if __name__ == "__main__":
 
                 # destinataire
                 if testemail is not None:
-                    to = [testemail]
+                    if ";" in testemail or "," in testemail:
+                        to = re.split(";|,", testemail)
+                    else:
+                        to = [testemail]
                 else:
                     if int(commune_id) > 0:
                         to = [mails[row[0]]]

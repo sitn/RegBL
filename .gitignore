@@ -136,4 +136,4 @@ dmypy.json
 *.recover
 
 # production of data
-data_producted/
+data_produced/

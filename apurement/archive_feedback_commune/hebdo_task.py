@@ -4,6 +4,7 @@ import sys
 import shutil
 from dotenv import load_dotenv
 from models import RegBLApurementFeedbackHebdoCanton, RegBLApurementFeedbackHebdoCommunes
+import datetime
 
 load_dotenv(r"..\..\.env")
 
@@ -30,8 +31,12 @@ ws = wb["Cantons"]
 
 
 # get date and check if it already exists in database (if yes: skip this file)
-date = ws.cell(1, 2).value.replace("Etat: ", "").split(".")
+date = ws.cell(1, 2).value.split(" ")[1].split(".")
 date = "-".join(date[::-1]) if len(date) == 3 else None
+try:
+    date = datetime.date.fromisoformat(date)
+except ValueError:
+    date = datetime.date.today()
 
 test = session.query(
     RegBLApurementFeedbackHebdoCanton
@@ -85,8 +90,12 @@ ws = wb["Communes"]
 
 
 # get date and check if it already exists in database (if yes: skip this file)
-date = ws.cell(1, 2).value.replace("Etat: ", "").split(".")
+date = ws.cell(1, 2).value.split(" ")[1].split(".")
 date = "-".join(date[::-1]) if len(date) == 3 else None
+try:
+    date = datetime.date.fromisoformat(date)
+except ValueError:
+    date = datetime.date.today()
 
 test = session.query(
     RegBLApurementFeedbackHebdoCommunes

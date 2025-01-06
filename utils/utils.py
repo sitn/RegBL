@@ -227,7 +227,7 @@ def _tableTitleGenerator(ws, sectionTitle, tableHeader, line_idx):
     return line_idx, table_start_row
 
 
-def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath, issue22_list, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", egidextfilter=True, log=False):
+def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath, issue22_list, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", egidextfilter=False, log=False):
     # copy canton_file to commune_file
     feedback_commune_filename = "_".join([str(commune_id), commune_name.replace(" ", "_"), "feedback", today]) + ".xlsx"
     feedback_commune_filepath = os.path.join(os.environ["FEEDBACK_COMMUNES_WORKING_DIR"], today, feedback_commune_filename)
@@ -330,18 +330,18 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
 
     if ws_line_i is not None:
         while ws.cell(ws_line_i, 2).value is not None:
-            if ws.cell(ws_line_i, 2).value == commune_id and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id:
                 if table_start_row is None:
                     tableHeader = ["EGID", "STRNAME", "DEINR", "PLZ4", "PLZNAME"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 1 - Bâtiments sans coordonnées", tableHeader, ws2_line_i)
 
-                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
-                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 11).value
-                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 12).value
-                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 13).value
-                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 15).value
-
-                ws2_line_i += 1
+                if egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
+                    ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
+                    ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 11).value
+                    ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 12).value
+                    ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 13).value
+                    ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 15).value
+                    ws2_line_i += 1
 
             ws_line_i += 1
 
@@ -371,19 +371,19 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     if ws_line_i is not None:
         while ws.cell(ws_line_i, 2).value is not None:
             statut_base_mo = ws.cell(ws_line_i, 19).value if ws.cell(ws_line_i, 19).value is not None else ""
-            if ws.cell(ws_line_i, 2).value == commune_id and not re.search("En travail", statut_base_mo, re.IGNORECASE) and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and not re.search("En travail", statut_base_mo, re.IGNORECASE):
                 if table_start_row is None:
                     tableHeader = ["EGID", "Adresse", "GKODE", "GKODN"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 2 - Coordonnées en dehors de la commune", tableHeader, ws2_line_i)
 
-                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
-                ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 11).value, ws.cell(ws_line_i, 12).value)
-                ws2.cell(ws2_line_i, 1).style = "Hyperlink"
-                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 5).value
-                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 11).value
-                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 12).value
-
-                ws2_line_i += 1
+                if egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
+                    ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
+                    ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 11).value, ws.cell(ws_line_i, 12).value)
+                    ws2.cell(ws2_line_i, 1).style = "Hyperlink"
+                    ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 5).value
+                    ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 11).value
+                    ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 12).value
+                    ws2_line_i += 1
 
             ws_line_i += 1
 
@@ -413,20 +413,20 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     if ws_line_i is not None:
         while ws.cell(ws_line_i, 2).value is not None:
             statut_base_mo = ws.cell(ws_line_i, 27).value if ws.cell(ws_line_i, 27).value is not None else ""
-            if ws.cell(ws_line_i, 2).value == commune_id and not re.search("En travail", statut_base_mo, re.IGNORECASE) and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and not re.search("En travail", statut_base_mo, re.IGNORECASE):
                 if table_start_row is None:
                     tableHeader = ["EGID", "PLZ4 RegBL", "PLZ4_Name RegBL", "PLZ4 MO", "PLZ4_Name MO"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 3 - Divergence de NPA", tableHeader, ws2_line_i)
 
-                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
-                ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 20).value, ws.cell(ws_line_i, 21).value)
-                ws2.cell(ws2_line_i, 1).style = "Hyperlink"
-                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 8).value
-                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 9).value
-                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 11).value
-                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 12).value
-
-                ws2_line_i += 1
+                if egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
+                    ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
+                    ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 20).value, ws.cell(ws_line_i, 21).value)
+                    ws2.cell(ws2_line_i, 1).style = "Hyperlink"
+                    ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 8).value
+                    ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 9).value
+                    ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 11).value
+                    ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 12).value
+                    ws2_line_i += 1
 
             ws_line_i += 1
 
@@ -456,24 +456,24 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     if ws_line_i is not None:
         while ws.cell(ws_line_i, 2).value is not None:
             statut_base_mo = ws.cell(ws_line_i, 26).value if ws.cell(ws_line_i, 26).value is not None else ""
-            if ws.cell(ws_line_i, 2).value == commune_id and not re.search("En travail", statut_base_mo, re.IGNORECASE) and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and not re.search("En travail", statut_base_mo, re.IGNORECASE):
                 if table_start_row is None:
                     tableHeader = ["EGID", "GKAT", "GPARZ", "GEBNR", "STRNAME", "DEINR", "PLZ4", "GBEZ", "BUR / REE"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 4 - Doublets d'adresses", tableHeader, ws2_line_i)
 
-                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
-                ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 7).value, ws.cell(ws_line_i, 8).value)
-                ws2.cell(ws2_line_i, 1).style = "Hyperlink"
-                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 6).value
-                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 22).value
-                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 23).value
-                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 11).value
-                ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 12).value
-                ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 13).value
-                ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 14).value
-                ws2.cell(ws2_line_i, 9).value = ws.cell(ws_line_i, 24).value
-
-                ws2_line_i += 1
+                if egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
+                    ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
+                    ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 7).value, ws.cell(ws_line_i, 8).value)
+                    ws2.cell(ws2_line_i, 1).style = "Hyperlink"
+                    ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 6).value
+                    ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 22).value
+                    ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 23).value
+                    ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 11).value
+                    ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 12).value
+                    ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 13).value
+                    ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 14).value
+                    ws2.cell(ws2_line_i, 9).value = ws.cell(ws_line_i, 24).value
+                    ws2_line_i += 1
 
             ws_line_i += 1
 
@@ -503,24 +503,24 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     if ws_line_i is not None:
         while ws.cell(ws_line_i, 2).value is not None:
             statut_base_mo = ws.cell(ws_line_i, 14).value if ws.cell(ws_line_i, 14).value is not None else ""
-            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 13).value != "bat_proj" and not re.search("En travail", statut_base_mo, re.IGNORECASE) and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 13).value != "bat_proj" and not re.search("En travail", statut_base_mo, re.IGNORECASE):
                 if table_start_row is None:
                     tableHeader = ["EGID", "GKAT", "GKLAS", "GSTAT", "GKODE", "GKODN", "ISSUE", "RESOLUTION_SGRF"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 5 - Définition du bâtiment", tableHeader, ws2_line_i)
 
-                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
-                (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
-                ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
-                ws2.cell(ws2_line_i, 1).style = "Hyperlink"
-                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 5).value
-                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 6).value
-                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 7).value
-                ws2.cell(ws2_line_i, 5).value = coord_e
-                ws2.cell(ws2_line_i, 6).value = coord_n
-                ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 12).value
-                ws2.cell(ws2_line_i, 8).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
-
-                ws2_line_i += 1
+                if egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
+                    ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
+                    (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
+                    ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
+                    ws2.cell(ws2_line_i, 1).style = "Hyperlink"
+                    ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 5).value
+                    ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 6).value
+                    ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 7).value
+                    ws2.cell(ws2_line_i, 5).value = coord_e
+                    ws2.cell(ws2_line_i, 6).value = coord_n
+                    ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 12).value
+                    ws2.cell(ws2_line_i, 8).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
+                    ws2_line_i += 1
 
             ws_line_i += 1
 
@@ -550,24 +550,24 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     if ws_line_i is not None:
         while ws.cell(ws_line_i, 2).value is not None:
             statut_base_mo = ws.cell(ws_line_i, 14).value if ws.cell(ws_line_i, 14).value is not None else ""
-            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 13).value != "bat_proj" and not re.search("En travail", statut_base_mo, re.IGNORECASE) and egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000:
+            if ws.cell(ws_line_i, 2).value == commune_id and ws.cell(ws_line_i, 13).value != "bat_proj" and not re.search("En travail", statut_base_mo, re.IGNORECASE):
                 if table_start_row is None:
                     tableHeader = ["EGID", "GKAT", "GKLAS", "GSTAT", "GKODE", "GKODN", "ISSUE", "RESOLUTION_SGRF"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "Liste 6 - Catégorie du bâtiment", tableHeader, ws2_line_i)
 
-                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
-                (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
-                ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
-                ws2.cell(ws2_line_i, 1).style = "Hyperlink"
-                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 5).value
-                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 6).value
-                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 7).value
-                ws2.cell(ws2_line_i, 5).value = coord_e
-                ws2.cell(ws2_line_i, 6).value = coord_n
-                ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 12).value
-                ws2.cell(ws2_line_i, 8).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
-
-                ws2_line_i += 1
+                if egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
+                    ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
+                    (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
+                    ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
+                    ws2.cell(ws2_line_i, 1).style = "Hyperlink"
+                    ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 5).value
+                    ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 6).value
+                    ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 7).value
+                    ws2.cell(ws2_line_i, 5).value = coord_e
+                    ws2.cell(ws2_line_i, 6).value = coord_n
+                    ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 12).value
+                    ws2.cell(ws2_line_i, 8).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
+                    ws2_line_i += 1
 
             ws_line_i += 1
 

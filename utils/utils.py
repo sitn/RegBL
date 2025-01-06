@@ -112,23 +112,24 @@ def get_issue_solution(filepath):
     return data
 
 
-def loadCommunesOFS():
+def loadCommunesOFS(filepath):
     communes_ofs = {}
 
-    wb_source = load_workbook(os.environ["STATIC_PATH_REPERTOIRE_COMMUNES_OFS"])
-    ws_source = wb_source["GDE"]
+    wb_source = load_workbook(filepath)
+    ws_source = wb_source["Communes"]
 
-    i = 0
-    while i < 1e4:
+    i = _findRowIndex(ws_source, "NE", column_id=2) - 1
+
+    while i < 1e2:
         i += 1
 
-        if ws_source.cell(i, 1).value is None:
+        if ws_source.cell(i, 2).value is None:
             break
 
-        if ws_source.cell(i, 1).value != "NE":
+        if ws_source.cell(i, 2).value != "NE":
             continue
 
-        communes_ofs[ws_source.cell(i, 3).value] = ws_source.cell(i, 5).value
+        communes_ofs[ws_source.cell(i, 3).value] = ws_source.cell(i, 4).value
 
     return communes_ofs
 

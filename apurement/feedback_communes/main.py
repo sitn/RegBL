@@ -43,8 +43,6 @@ if __name__ == "__main__":
         raise ValueError("Invalid parameters ")
 
     # get feedback for canton de Neuchâtel
-    communes_ofs = utils.loadCommunesOFS()
-
     # prepare working directory
     today = datetime.strftime(datetime.now(), "%Y%m%d")
     feedback_commune_path = os.path.join(os.environ["FEEDBACK_COMMUNES_WORKING_DIR"], today)
@@ -53,6 +51,7 @@ if __name__ == "__main__":
 
     # get lists
     feedback_canton_filepath = utils.downloadListeCantonNeuchatel(path=feedback_commune_path, batprojtreat=batprojtreat)
+    communes_ofs = utils.loadCommunesOFS(feedback_canton_filepath)
     (issue22_list, issue22_canton_filepath) = utils.downloadIssue22CantonNeuchatel(path=feedback_commune_path)
 
     path_issue_solution = os.environ["RAPPORT_ANALYZER_ISSUE_SOLUTION_PATH"]
@@ -76,9 +75,11 @@ if __name__ == "__main__":
             # if commune_id not in [6487, 6417, 6458, 6416]:
             #     continue
             print(commune_id, communes_ofs[commune_id])
-            (feedback_commune_filepath, feedback_commune, nb_errors_by_list) = utils.generateCommuneErrorFile(commune_id, communes_ofs[commune_id], feedback_canton_filepath, issue22_list, issue_solution, today, environ, egidextfilter, log=False)
+            result = utils.generateCommuneErrorFile(commune_id, communes_ofs[commune_id], feedback_canton_filepath, issue22_list, issue_solution, today, environ, egidextfilter, log=False)
 
-            csvfile = writer.writerow(nb_errors_by_list)
+            if result is not None:
+                (feedback_commune_filepath, feedback_commune, nb_errors_by_list) = result
+                csvfile = writer.writerow(nb_errors_by_list)
 
         # do the same for the canton
         print("Canton de Neuchâtel")

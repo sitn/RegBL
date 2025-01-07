@@ -1,7 +1,7 @@
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.table import Table, TableStyleInfo
-from datetime import datetime
+from datetime import datetime, date
 import requests
 import os
 import re
@@ -228,7 +228,47 @@ def _tableTitleGenerator(ws, sectionTitle, tableHeader, line_idx):
     return line_idx, table_start_row
 
 
-def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath, issue22_list, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", egidextfilter=False, log=False):
+def _getDateFromExcel(excel_date):
+    dt = None
+    if excel_date is not None:
+        dt = datetime.fromordinal(datetime(1900, 1, 1).toordinal() + excel_date - 2)
+        tt = dt.timetuple()
+        print(dt)
+        print(tt)
+    return dt
+
+
+def getEGIDWhitelistSGRF():
+    whitelist_path = os.environ["FEEDBACK_COMMUNES_EGID_WHITELIST_CONTROLS_PATH"]
+    whitelist_sgrf = {}
+    if os.path.exists(whitelist_path):
+        wb_whitelist = load_workbook(whitelist_path)
+        ws_whitelist = wb_whitelist.active
+        i = 2
+        while ws_whitelist.cell(i, 1).value is not None:  # il y a un EGID
+            if ws_whitelist.cell(i, 4).value is None:  # il n'y a pas de date de sortie
+                whitelist_sgrf[ws_whitelist.cell(i, 1).value] = {
+                    "egid": ws_whitelist.cell(i, 1).value,
+                    "commune": ws_whitelist.cell(i, 2).value,
+                    "date_entree": date.strftime(ws_whitelist.cell(i, 3).value, "%d.%m.%Y") if ws_whitelist.cell(i, 3).value is not None else "",
+                    "date_sortie": date.strftime(ws_whitelist.cell(i, 4).value, "%d.%m.%Y") if ws_whitelist.cell(i, 4).value is not None else "",
+                    "remarque": ws_whitelist.cell(i, 5).value or "",
+                }
+                i += 1
+    return whitelist_sgrf
+
+
+def _log_whitelisted_egid(egid, egidwhitelistsgrf, today, commune_name):
+    filepath = os.path.join(os.environ["FEEDBACK_COMMUNES_WORKING_DIR"], today, f"{today}_whitelisted.csv")
+    with open(filepath, "a+") as file:
+        if os.stat(filepath).st_size == 0:
+            file.write(f"EGID;Commune;Date entree;Remarque\n")
+
+        file.write(f'{egid};{commune_name};{egidwhitelistsgrf["date_entree"]};{egidwhitelistsgrf["remarque"]}\n')
+    return
+
+
+def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath, issue22_list, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", egidextfilter=False, log=False, egidwhitelist=[]):
     # copy canton_file to commune_file
     feedback_commune_filename = "_".join([str(commune_id), commune_name.replace(" ", "_"), "feedback", today]) + ".xlsx"
     feedback_commune_filepath = os.path.join(os.environ["FEEDBACK_COMMUNES_WORKING_DIR"], today, feedback_commune_filename)
@@ -336,7 +376,10 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     tableHeader = ["EGID", "STRNAME", "DEINR", "PLZ4", "PLZNAME"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 1 - Bâtiments sans coordonnées", tableHeader, ws2_line_i)
 
-                if egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
+                if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, commune_name)
+
+                elif egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
                     ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
                     ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 11).value
                     ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 12).value
@@ -377,7 +420,10 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     tableHeader = ["EGID", "Adresse", "GKODE", "GKODN"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 2 - Coordonnées en dehors de la commune", tableHeader, ws2_line_i)
 
-                if egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
+                if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, commune_name)
+
+                elif egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
                     ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
                     ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 11).value, ws.cell(ws_line_i, 12).value)
                     ws2.cell(ws2_line_i, 1).style = "Hyperlink"
@@ -419,7 +465,10 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     tableHeader = ["EGID", "PLZ4 RegBL", "PLZ4_Name RegBL", "PLZ4 MO", "PLZ4_Name MO"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 3 - Divergence de NPA", tableHeader, ws2_line_i)
 
-                if egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
+                if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, commune_name)
+
+                elif egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
                     ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
                     ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 20).value, ws.cell(ws_line_i, 21).value)
                     ws2.cell(ws2_line_i, 1).style = "Hyperlink"
@@ -462,7 +511,10 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     tableHeader = ["EGID", "GKAT", "GPARZ", "GEBNR", "STRNAME", "DEINR", "PLZ4", "GBEZ", "BUR / REE"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 4 - Doublets d'adresses", tableHeader, ws2_line_i)
 
-                if egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
+                if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, commune_name)
+
+                elif egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
                     ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
                     ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 7).value, ws.cell(ws_line_i, 8).value)
                     ws2.cell(ws2_line_i, 1).style = "Hyperlink"
@@ -509,7 +561,10 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     tableHeader = ["EGID", "GKAT", "GKLAS", "GSTAT", "GKODE", "GKODN", "ISSUE", "RESOLUTION_SGRF"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 5 - Définition du bâtiment", tableHeader, ws2_line_i)
 
-                if egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
+                if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, commune_name)
+
+                elif egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
                     ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
                     (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
                     ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
@@ -556,7 +611,10 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     tableHeader = ["EGID", "GKAT", "GKLAS", "GSTAT", "GKODE", "GKODN", "ISSUE", "RESOLUTION_SGRF"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "Liste 6 - Catégorie du bâtiment", tableHeader, ws2_line_i)
 
-                if egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
+                if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, commune_name)
+
+                elif egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
                     ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
                     (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
                     ws2.cell(ws2_line_i, 1).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
@@ -647,7 +705,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
     return (feedback_commune_filepath, feedback_commune, nb_errors_by_list)
 
 
-def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", log=False):
+def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", log=False, egidwhitelist=[]):
     # copy canton_file to commune_file
     # feedback_commune_filename = "_".join(["Canton_de_Neuchâtel", "SGRF", "feedback", today]) + ".xlsx"
     feedback_commune_filename = "_".join(["0", "Canton_de_Neuchâtel", "feedback", today]) + ".xlsx"
@@ -707,14 +765,17 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
                     tableHeader = ["COMMUNE", "EGID", "STRNAME", "DEINR", "PLZ4", "PLZNAME"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 1 - Bâtiments sans coordonnées", tableHeader, ws2_line_i)
 
-                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
-                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
-                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 11).value
-                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 12).value
-                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 13).value
-                ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 15).value
+                if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, ws.cell(ws_line_i, 3).value)
 
-                ws2_line_i += 1
+                else:
+                    ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
+                    ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
+                    ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 11).value
+                    ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 12).value
+                    ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 13).value
+                    ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 15).value
+                    ws2_line_i += 1
 
             ws_line_i += 1
 
@@ -748,16 +809,19 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
                     tableHeader = ["COMMUNE", "EGID", "Adresse", "GKODE", "ETAT_MO", "GKODN"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 2 - Coordonnées en dehors de la commune", tableHeader, ws2_line_i)
 
-                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
-                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
-                ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 11).value, ws.cell(ws_line_i, 12).value)
-                ws2.cell(ws2_line_i, 2).style = "Hyperlink"
-                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 5).value
-                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 11).value
-                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 19).value
-                ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 12).value
+                if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, ws.cell(ws_line_i, 3).value)
 
-                ws2_line_i += 1
+                else:
+                    ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
+                    ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
+                    ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 11).value, ws.cell(ws_line_i, 12).value)
+                    ws2.cell(ws2_line_i, 2).style = "Hyperlink"
+                    ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 5).value
+                    ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 11).value
+                    ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 19).value
+                    ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 12).value
+                    ws2_line_i += 1
 
             ws_line_i += 1
 
@@ -791,17 +855,20 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
                     tableHeader = ["COMMUNE", "EGID", "PLZ4 RegBL", "PLZ4_Name RegBL", "PLZ4 MO", "ETAT_MO", "PLZ4_Name MO"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 3 - Divergence de NPA", tableHeader, ws2_line_i)
 
-                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
-                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
-                ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 20).value, ws.cell(ws_line_i, 21).value)
-                ws2.cell(ws2_line_i, 2).style = "Hyperlink"
-                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 8).value
-                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 9).value
-                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 11).value
-                ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 27).value
-                ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 12).value
+                if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, ws.cell(ws_line_i, 3).value)
 
-                ws2_line_i += 1
+                else:
+                    ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
+                    ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
+                    ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 20).value, ws.cell(ws_line_i, 21).value)
+                    ws2.cell(ws2_line_i, 2).style = "Hyperlink"
+                    ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 8).value
+                    ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 9).value
+                    ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 11).value
+                    ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 27).value
+                    ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 12).value
+                    ws2_line_i += 1
 
             ws_line_i += 1
 
@@ -835,21 +902,24 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
                     tableHeader = ["COMMUNE", "EGID", "GKAT", "GPARZ", "GEBNR", "STRNAME", "DEINR", "PLZ4", "GBEZ", "ETAT_MO", "BUR / REE"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 4 - Doublets d'adresses", tableHeader, ws2_line_i)
 
-                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
-                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
-                ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 7).value, ws.cell(ws_line_i, 8).value)
-                ws2.cell(ws2_line_i, 2).style = "Hyperlink"
-                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 6).value
-                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 22).value
-                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 23).value
-                ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 11).value
-                ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 12).value
-                ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 13).value
-                ws2.cell(ws2_line_i, 9).value = ws.cell(ws_line_i, 14).value
-                ws2.cell(ws2_line_i, 10).value = ws.cell(ws_line_i, 26).value
-                ws2.cell(ws2_line_i, 11).value = ws.cell(ws_line_i, 24).value
+                if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, ws.cell(ws_line_i, 3).value)
 
-                ws2_line_i += 1
+                else:
+                    ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
+                    ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
+                    ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(ws.cell(ws_line_i, 7).value, ws.cell(ws_line_i, 8).value)
+                    ws2.cell(ws2_line_i, 2).style = "Hyperlink"
+                    ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 6).value
+                    ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 22).value
+                    ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 23).value
+                    ws2.cell(ws2_line_i, 6).value = ws.cell(ws_line_i, 11).value
+                    ws2.cell(ws2_line_i, 7).value = ws.cell(ws_line_i, 12).value
+                    ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 13).value
+                    ws2.cell(ws2_line_i, 9).value = ws.cell(ws_line_i, 14).value
+                    ws2.cell(ws2_line_i, 10).value = ws.cell(ws_line_i, 26).value
+                    ws2.cell(ws2_line_i, 11).value = ws.cell(ws_line_i, 24).value
+                    ws2_line_i += 1
 
             ws_line_i += 1
 
@@ -883,21 +953,24 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
                     tableHeader = ["COMMUNE", "EGID", "GKAT", "GKLAS", "GSTAT", "GKODE", "GKODN", "ISSUE", "ETAT_MO", "RESOLUTION_SGRF"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 5 - Définition du bâtiment", tableHeader, ws2_line_i)
 
-                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
-                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
-                (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
-                ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
-                ws2.cell(ws2_line_i, 2).style = "Hyperlink"
-                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 5).value
-                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 6).value
-                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 7).value
-                ws2.cell(ws2_line_i, 6).value = coord_e
-                ws2.cell(ws2_line_i, 7).value = coord_n
-                ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 12).value
-                ws2.cell(ws2_line_i, 9).value = ws.cell(ws_line_i, 14).value
-                ws2.cell(ws2_line_i, 10).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
+                if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, ws.cell(ws_line_i, 3).value)
 
-                ws2_line_i += 1
+                else:
+                    ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
+                    ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
+                    (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
+                    ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
+                    ws2.cell(ws2_line_i, 2).style = "Hyperlink"
+                    ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 5).value
+                    ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 6).value
+                    ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 7).value
+                    ws2.cell(ws2_line_i, 6).value = coord_e
+                    ws2.cell(ws2_line_i, 7).value = coord_n
+                    ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 12).value
+                    ws2.cell(ws2_line_i, 9).value = ws.cell(ws_line_i, 14).value
+                    ws2.cell(ws2_line_i, 10).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
+                    ws2_line_i += 1
 
             ws_line_i += 1
 
@@ -931,21 +1004,24 @@ def generateCantonErrorFile(feedback_canton_filepath, issue_solution, today=date
                     tableHeader = ["COMMUNE", "EGID", "GKAT", "GKLAS", "GSTAT", "GKODE", "GKODN", "ISSUE", "ETAT_MO", "RESOLUTION_SGRF"]
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "Liste 6 - Catégorie du bâtiment", tableHeader, ws2_line_i)
 
-                ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
-                ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
-                (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
-                ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
-                ws2.cell(ws2_line_i, 2).style = "Hyperlink"
-                ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 5).value
-                ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 6).value
-                ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 7).value
-                ws2.cell(ws2_line_i, 6).value = coord_e
-                ws2.cell(ws2_line_i, 7).value = coord_n
-                ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 12).value
-                ws2.cell(ws2_line_i, 9).value = ws.cell(ws_line_i, 14).value
-                ws2.cell(ws2_line_i, 10).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
+                if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, ws.cell(ws_line_i, 3).value)
 
-                ws2_line_i += 1
+                else:
+                    ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 3).value
+                    ws2.cell(ws2_line_i, 2).value = ws.cell(ws_line_i, 4).value
+                    (coord_e, coord_n) = ws.cell(ws_line_i, 9).value.split(" ")
+                    ws2.cell(ws2_line_i, 2).hyperlink = os.environ["FEEDBACK_COMMUNES_URL_CONSULTATION_" + environ + "_ISSUE_22_SITN_COORD"].format(coord_e, coord_n)
+                    ws2.cell(ws2_line_i, 2).style = "Hyperlink"
+                    ws2.cell(ws2_line_i, 3).value = ws.cell(ws_line_i, 5).value
+                    ws2.cell(ws2_line_i, 4).value = ws.cell(ws_line_i, 6).value
+                    ws2.cell(ws2_line_i, 5).value = ws.cell(ws_line_i, 7).value
+                    ws2.cell(ws2_line_i, 6).value = coord_e
+                    ws2.cell(ws2_line_i, 7).value = coord_n
+                    ws2.cell(ws2_line_i, 8).value = ws.cell(ws_line_i, 12).value
+                    ws2.cell(ws2_line_i, 9).value = ws.cell(ws_line_i, 14).value
+                    ws2.cell(ws2_line_i, 10).value = _get_issue(ws.cell(ws_line_i, 12).value, issue_solution)
+                    ws2_line_i += 1
 
             ws_line_i += 1
 

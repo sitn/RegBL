@@ -137,3 +137,6 @@ dmypy.json
 
 # production of data
 data_produced/
+
+# whitelist folder
+whitelist/

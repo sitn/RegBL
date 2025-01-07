@@ -1,74 +1,103 @@
-<!DOCTYPE html>
-<html lang="fr">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Template avec Header et Footer</title>
-    <style>
-        body {
+    <style type="text/css">
+        .tg {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        .tg td {
+            border-color: black;
+            border-style: solid;
+            border-width: 1px;
+            overflow: hidden;
+            padding: 10px 10px;
+            word-break: normal;
+        }
+
+        .tg th {
+            border-color: black;
+            border-style: solid;
+            border-width: 1px;
+            overflow: hidden;
+            padding: 10px 10px;
+            word-break: normal;
+        }
+
+        .tg .tg-0pky {
+            border-color: inherit;
+            vertical-align: middle
+        }
+
+        ul {
             margin: 0;
-            font-family: Arial, sans-serif;
+            padding: 0;
         }
-        .header, .footer {
-            background-color: #add8e6; /* Bleu pâle */
-            color: #333;
-            padding: 20px;
-            text-align: center;
-            padding-top: 1.3em;
-            padding-bottom: 1.3em;
-        }
-        main {
-            padding: 10px 20px 10px 20px;
-            min-height: auto; /* Ajuster selon vos besoins */
-        }
-        .variable-space {
-            display: inline-block;
-            width: 5ch; /* 5 caractères de large */
-            font-family: monospace; /* Police à largeur fixe */
-            border: 1px solid #ccc; /* Optionnel : pour visualiser l'espace réservé */
-            text-align: right; /* Aligner le texte à droite */
+
+        li {
+            margin: 10px 0px
         }
     </style>
 </head>
+
 <body>
-    <div class="header">
-        <h1>RegBL - apurement des données</h1>
-    </div>
+    <table style="width: 100%;">
+        <thead>
+            <tr>
+                <th style="background-color: lightblue; padding: 25px;text-align: left;">
+                    <h2 style="margin: 0">RegBL - Apurement des données</h2>
+                </th>
+            </tr>
+        </thead>
 
-    <main>
-        <!-- Espace pour des communications -->
-        <p style="font-style: italic; margin-bottom: 30px;">Au personnel des communes en charge du RegBL</p>
-        <p style="margin-bottom: 30px;">Commune: <span style="font-weight: bold;">{{ COMMUNE_NAME }}</span></p>
-        <p>Bonjour,</p>
-        <p>Vous trouverez ci-joint la liste des erreurs du RegBL de votre commune. Cette liste est générée sur la base des données de l'OFS et complétée par le SGRF avec des conseils de traitement.</p>
-        <p>
-            Voici un aperçu des erreurs:
-            <ul>
-                <li>Liste 1: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_1 }}</span> Bâtiments existants dans le RegBL sans coordonnées de bâtiment (sans les habitations provisoires)</li>
-                <li>Liste 2: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_2 }}</span> Bâtiments dont les coordonnées se situent en dehors des limites de la commune indiquée</li>
-                <li>Liste 3: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_3 }}</span> Incohérences entre les NPA issus du RegBL et ceux de la MO</li>
-                <li>Liste 4: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_4 }}</span> Entrées des bâtiments existants dans le RegBL ayant une adresse non univoques (sans les habitations provisoires)</li>
-                <li>Liste 5: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_5 }}</span> Incohérences dans la définition du bâtiment entre la MO et le RegBL</li>
-                <li>Liste 6: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_6 }}</span> Incohérences entre la catégorie du bâtiment (GKAT) du RegBL et la couche d'information de la MO</li>
-                <li>Bâtiments manquants: <span class="variable-space">{{ NB_ERROR_ISSUE_22 }}</span></li>
-            </ul>
-            <span style="font-style: italic;">Dans le cas où aucune erreur n'est constatée dans une liste, cette liste n'apparaît pas dans le fichier.</span>
-            <br>
-            <span style="font-style: italic;">Si aucune erreur n'est constatée, le fichier est vide et n'est donc pas joint à ce message. </span>
-        </p>
-        <p>Les directives pour l'harmonisation MO-communes des données du RegBL se trouvent <a href="https://www.ne.ch/autorites/DDTE/SGRF/mensuration/Documents/Directives/HarmRegBL_MO_CantonNE.pdf">ici</a></p>
-        <p>Nous nous tenons volontiers à disposition pour tout complément.</p>
-        <p>Avec nos meilleures salutations,</p>
-        <p>Pour le SGRF, {{ ADMINISTRATOR_NAME }}</p>
-        <p style="font-style: italic; font-size: 0.8em; margin-top: 40px;">
-        <!-- <p style="font-style: italic; font-size: small; margin-top: 40px;"> -->
-            Ne pas répondre à ce message, cette adresse e-mail n'est pas relevée.<br>
-            Si vous n'êtes pas ou plus en charge du RegBL, nous vous remercions de nous communiquer le contact de la nouvelle personne en charge de ce dossier.
-        </p>
-    </main>
+        <tbody>
+            <tr>
+                <td style="padding: 25px;">
+                    <!-- Espace pour des communications -->
+                    <p style="font-style: italic; margin-bottom: 30px;">Au personnel des communes en charge du RegBL</p>
+                    <p style="margin-bottom: 30px;">Commune: <span style="font-weight: bold;">{{ COMMUNE_NAME }}</span></p>
+                    <p>Bonjour,</p>
+                    <p>Vous trouverez ci-joint la liste des erreurs du RegBL de votre commune. Cette liste est générée sur la base des données de l'OFS et complétée par le SGRF avec des conseils de traitement.</p>
+                    <p>
+                        Voici un aperçu des erreurs:
+                    <ul>
+                        <li>Liste 1: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_1 }}</span> Bâtiments existants dans le RegBL sans coordonnées de bâtiment (sans les habitations provisoires)</li>
+                        <li>Liste 2: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_2 }}</span> Bâtiments dont les coordonnées se situent en dehors des limites de la commune indiquée</li>
+                        <li>Liste 3: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_3 }}</span> Incohérences entre les NPA issus du RegBL et ceux de la MO</li>
+                        <li>Liste 4: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_4 }}</span> Entrées des bâtiments existants dans le RegBL ayant une adresse non univoques (sans les habitations provisoires)</li>
+                        <li>Liste 5: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_5 }}</span> Incohérences dans la définition du bâtiment entre la MO et le RegBL</li>
+                        <li>Liste 6: <span style="margin-right: 10px;" class="variable-space">{{ NB_ERROR_LIST_6 }}</span> Incohérences entre la catégorie du bâtiment (GKAT) du RegBL et la couche d'information de la MO</li>
+                        <li>Bâtiments manquants: <span class="variable-space">{{ NB_ERROR_ISSUE_22 }}</span></li>
+                    </ul>
+                    <span style="font-style: italic;">Dans le cas où aucune erreur n'est constatée dans une liste, cette liste n'apparaît pas dans le fichier.</span>
+                    <br>
+                    <span style="font-style: italic;">Si aucune erreur n'est constatée, le fichier est vide et n'est donc pas joint à ce message. </span>
+                    </p>
+                    <p>Les directives pour l'harmonisation MO-communes des données du RegBL se trouvent <a href="https://www.ne.ch/autorites/DDTE/SGRF/mensuration/Documents/Directives/HarmRegBL_MO_CantonNE.pdf">ici</a></p>
+                    <p>Nous nous tenons volontiers à disposition pour tout complément.</p>
+                    <p>Avec nos meilleures salutations,</p>
+                    <p>Pour le SGRF, {{ ADMINISTRATOR_NAME }}</p>
+                    <p style="font-style: italic; font-size: 0.8em; margin-top: 40px;">
+                        <!-- <p style="font-style: italic; font-size: small; margin-top: 40px;"> -->
+                        Ne pas répondre à ce message, cette adresse e-mail n'est pas relevée.<br>
+                        Si vous n'êtes pas ou plus en charge du RegBL, nous vous remercions de nous communiquer le contact de la nouvelle personne en charge de ce dossier.
+                    </p>
 
-    <div class="footer">
-        <p>Pour toute question : <a href="mailto:{{ ADMINISTRATOR_EMAIL }}">{{ ADMINISTRATOR_EMAIL }}</a></p>
-    </div>
+                </td>
+            </tr>
+        </tbody>
+
+        <tfoot>
+            <tr>
+                <td style="background-color: lightblue; padding: 25px;text-align: left;">
+                    <p>Pour toute question : <a href="mailto:{{ ADMINISTRATOR_EMAIL }}">{{ ADMINISTRATOR_EMAIL }}</a></p>
+                </td>
+            </tr>
+
+        </tfoot>
+    </table>
+
 </body>
+
 </html>

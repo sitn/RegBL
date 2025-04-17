@@ -238,11 +238,13 @@ def _getDateFromExcel(excel_date):
     return dt
 
 
-def getEGIDWhitelistSGRF():
-    whitelist_path = os.environ["FEEDBACK_COMMUNES_EGID_WHITELIST_CONTROLS_PATH"]
+def getEGIDWhitelistSGRF(path=None):
+    if path is None:
+        os.environ["FEEDBACK_COMMUNES_EGID_WHITELIST_CONTROLS_PATH"]
+
     whitelist_sgrf = {}
-    if os.path.exists(whitelist_path):
-        wb_whitelist = load_workbook(whitelist_path)
+    if os.path.exists(path):
+        wb_whitelist = load_workbook(path)
         ws_whitelist = wb_whitelist.active
         i = 2
         while ws_whitelist.cell(i, 1).value is not None:  # il y a un EGID
@@ -253,22 +255,34 @@ def getEGIDWhitelistSGRF():
                     "date_entree": date.strftime(ws_whitelist.cell(i, 3).value, "%d.%m.%Y") if ws_whitelist.cell(i, 3).value is not None else "",
                     "date_sortie": date.strftime(ws_whitelist.cell(i, 4).value, "%d.%m.%Y") if ws_whitelist.cell(i, 4).value is not None else "",
                     "remarque": ws_whitelist.cell(i, 5).value or "",
+                    "xlsx_row_id": i,
                 }
                 i += 1
     return whitelist_sgrf
 
 
-def _log_whitelisted_egid(egid, egidwhitelistsgrf, today, commune_name):
+def _log_whitelisted_egid(egid, egidwhitelistsgrf, ws_whitelist, today, commune_name):
     filepath = os.path.join(os.environ["FEEDBACK_COMMUNES_WORKING_DIR"], today, f"{today}_whitelisted.csv")
     with open(filepath, "a+") as file:
         if os.stat(filepath).st_size == 0:
             file.write(f"EGID;Commune;Date entree;Remarque\n")
 
         file.write(f'{egid};{commune_name};{egidwhitelistsgrf["date_entree"]};{egidwhitelistsgrf["remarque"]}\n')
+
+    # Ecrire la date dans le fichier whitelist
+    if ws_whitelist is not None:
+        ws_whitelist.cell(egidwhitelistsgrf["xlsx_row_id"], 6).value = f"{today[6:]:2}.{today[4:6]:2}.{today[:4]:4}"
+
     return
 
 
-def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath, issue22_list, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", egidextfilter=False, log=False, egidwhitelist=[]):
+def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath, issue22_list, issue_solution, today=datetime.strftime(datetime.now(), "%Y%m%d"), environ="INTER", egidextfilter=False, log=False, egidwhitelist=[], whitelist_path=None):
+    # get active sheet of whitelist
+    ws_whitelist = None
+    if whitelist_path is not None and os.path.exists(whitelist_path):
+        wb_whitelist = load_workbook(whitelist_path)
+        ws_whitelist = wb_whitelist.active
+
     # copy canton_file to commune_file
     feedback_commune_filename = "_".join([str(commune_id), commune_name.replace(" ", "_"), "feedback", today]) + ".xlsx"
     feedback_commune_filepath = os.path.join(os.environ["FEEDBACK_COMMUNES_WORKING_DIR"], today, feedback_commune_filename)
@@ -377,7 +391,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 1 - Bâtiments sans coordonnées", tableHeader, ws2_line_i)
 
                 if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
-                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, commune_name)
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], ws_whitelist, today, commune_name)
 
                 elif egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
                     ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
@@ -421,7 +435,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 2 - Coordonnées en dehors de la commune", tableHeader, ws2_line_i)
 
                 if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
-                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, commune_name)
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], ws_whitelist, today, commune_name)
 
                 elif egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
                     ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
@@ -466,7 +480,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 3 - Divergence de NPA", tableHeader, ws2_line_i)
 
                 if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
-                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, commune_name)
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], ws_whitelist, today, commune_name)
 
                 elif egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
                     ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
@@ -512,7 +526,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 4 - Doublets d'adresses", tableHeader, ws2_line_i)
 
                 if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
-                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, commune_name)
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], ws_whitelist, today, commune_name)
 
                 elif egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
                     ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
@@ -562,7 +576,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "LISTE 5 - Définition du bâtiment", tableHeader, ws2_line_i)
 
                 if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
-                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, commune_name)
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], ws_whitelist, today, commune_name)
 
                 elif egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
                     ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
@@ -612,7 +626,7 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
                     ws2_line_i, table_start_row = _tableTitleGenerator(ws2, "Liste 6 - Catégorie du bâtiment", tableHeader, ws2_line_i)
 
                 if ws.cell(ws_line_i, 4).value in egidwhitelist.keys():
-                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], today, commune_name)
+                    _log_whitelisted_egid(ws.cell(ws_line_i, 4).value, egidwhitelist[ws.cell(ws_line_i, 4).value], ws_whitelist, today, commune_name)
 
                 elif egidextfilter is False or (egidextfilter is True and ws.cell(ws_line_i, 4).value < 500000000):
                     ws2.cell(ws2_line_i, 1).value = ws.cell(ws_line_i, 4).value
@@ -701,6 +715,10 @@ def generateCommuneErrorFile(commune_id, commune_name, feedback_canton_filepath,
             wb.remove(wb[ws_name])
 
     wb.save(feedback_commune_filepath)
+
+    # enregistrer la whiteliste
+    if ws_whitelist is not None:
+        wb_whitelist.save(whitelist_path)
 
     return (feedback_commune_filepath, feedback_commune, nb_errors_by_list)
 

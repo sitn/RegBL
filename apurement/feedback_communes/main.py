@@ -62,7 +62,8 @@ if __name__ == "__main__":
     issue_solution = utils.get_issue_solution(path_issue_solution)
 
     # get whiteliste
-    egid_whitelist_sgrf = utils.getEGIDWhitelistSGRF() if egidwhitelistfilter is True else []
+    whitelist_path = os.environ["FEEDBACK_COMMUNES_EGID_WHITELIST_CONTROLS_PATH"]
+    egid_whitelist_sgrf = utils.getEGIDWhitelistSGRF(path=whitelist_path) if egidwhitelistfilter is True else []
 
     # write feedback
     feedback_filepath = os.path.join(feedback_commune_path, f"{today}-feedback.csv")
@@ -78,11 +79,11 @@ if __name__ == "__main__":
 
         # go through each commune and create an excel with errors if any
         for commune_id in communes_ofs.keys():
-            # if commune_id not in [6487]:
+            # if commune_id not in [6421]:
             # if commune_id not in [6421, 6417, 6458, 6416]:
-            #     continue
+                # continue
             print(commune_id, communes_ofs[commune_id])
-            result = utils.generateCommuneErrorFile(commune_id, communes_ofs[commune_id], feedback_canton_filepath, issue22_list, issue_solution, today, environ, egidextfilter, log=False, egidwhitelist=egid_whitelist_sgrf)
+            result = utils.generateCommuneErrorFile(commune_id, communes_ofs[commune_id], feedback_canton_filepath, issue22_list, issue_solution, today, environ, egidextfilter, log=False, egidwhitelist=egid_whitelist_sgrf, whitelist_path=whitelist_path)
 
             if result is not None:
                 (feedback_commune_filepath, feedback_commune, nb_errors_by_list) = result

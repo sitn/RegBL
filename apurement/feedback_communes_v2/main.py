@@ -1,4 +1,5 @@
 import csv
+import math
 import os
 import pandas as pd
 import re
@@ -580,10 +581,6 @@ def send_mail_municipalities(feedback_path, municipality_filepath, testemail=Non
                     mail_file.write(email_content)
 
                 # sdfs
-
-
-from openpyxl.styles import Alignment
-import math
 
 
 def _auto_resize_worksheet(ws, max_col_width=50, min_col_width=10, base_row_height=15):

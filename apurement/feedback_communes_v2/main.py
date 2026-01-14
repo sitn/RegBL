@@ -77,7 +77,7 @@ def getDataFrame(path: str, json_fileName: str, excel_fileName: str, filters=[])
     if "whitelist" in filters:
         print("filter whitelist")
         # open and get actual data from whitelist
-        whitelist_path = r"C:\dev\regbl_toolbox\whitelist\egid_whitelist_controls.xlsx"
+        whitelist_path = os.getenv("FEEDBACK_COMMUNES_v2_WHITELIST_FILEPATH")
         df_whitelist = pd.read_excel(whitelist_path)
         df_whitelist = df_whitelist[df_whitelist["Date sortie"].isna()]
         # filter df with data from df_whitelist

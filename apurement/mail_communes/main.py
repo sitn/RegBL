@@ -118,7 +118,8 @@ if __name__ == "__main__":
                         to = [testemail]
                 else:
                     if int(commune_id) > 0:
-                        to = [mails[row[0]]]
+                        to = ["marc.rufener@ne.ch"]
+                        # to = [mails[row[0]]]
                         # continue
                     else:
                         # Canton de neuchâtel

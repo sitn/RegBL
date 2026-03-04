@@ -1,4 +1,5 @@
 import csv
+import math
 import os
 import pandas as pd
 import re
@@ -76,7 +77,7 @@ def getDataFrame(path: str, json_fileName: str, excel_fileName: str, filters=[])
     if "whitelist" in filters:
         print("filter whitelist")
         # open and get actual data from whitelist
-        whitelist_path = r"C:\dev\regbl_toolbox\whitelist\egid_whitelist_controls.xlsx"
+        whitelist_path = os.getenv("FEEDBACK_COMMUNES_v2_WHITELIST_FILEPATH")
         df_whitelist = pd.read_excel(whitelist_path)
         df_whitelist = df_whitelist[df_whitelist["Date sortie"].isna()]
         # filter df with data from df_whitelist
@@ -582,10 +583,6 @@ def send_mail_municipalities(feedback_path, municipality_filepath, testemail=Non
                 # sdfs
 
 
-from openpyxl.styles import Alignment
-import math
-
-
 def _auto_resize_worksheet(ws, max_col_width=50, min_col_width=10, base_row_height=15):
     """
     Ajuste automatiquement la largeur des colonnes et la hauteur des lignes
@@ -756,4 +753,5 @@ if __name__ == "__main__":
 
     # 7. Send mail to municipalities
     if opt["sendmail"] is True:
+        print(f"sending e-mail... Testemail: {opt["testemail"]}")
         send_mail_municipalities(filepath, municipality_filepath, testemail=opt["testemail"])

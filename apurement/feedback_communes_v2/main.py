@@ -21,7 +21,6 @@ from openpyxl.utils import get_column_letter, range_boundaries
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from pathlib import Path
 
-
 load_dotenv(override=True)
 
 
@@ -754,5 +753,5 @@ if __name__ == "__main__":
 
     # 7. Send mail to municipalities
     if opt["sendmail"] is True:
-        print(f"sending e-mail... Testemail: {opt["testemail"]}")
+        print(f"sending e-mail... Testemail: {opt['testemail']}")
         send_mail_municipalities(filepath, municipality_filepath, testemail=opt["testemail"])

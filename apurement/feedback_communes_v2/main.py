@@ -681,7 +681,7 @@ def launching_options(argv):
         # autofill parameters
         if "--auto" in argv:
             opt["environ"] = "INTER"
-            opt["batproj_filter"] = False
+            opt["batproj_filter"] = True
             opt["egidwhitelist_filter"] = True
             opt["etatmo_filter"] = True
             opt["sendmail"] = True

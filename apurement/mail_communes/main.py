@@ -18,13 +18,13 @@ dt = datetime.strftime(datetime.now(), "%Y%m%d")
 
 
 def get_mail_template():
-    file_loader = FileSystemLoader(r"apurement\mail_communes\templates")
+    file_loader = FileSystemLoader(os.getenv("FEEDBACK_COMMUNES_v2_MAIL_TEMPLATE_PATH"))
     env = Environment(loader=file_loader)
     return env.get_template("feedback_commune.html")
 
 
 def get_email_registry():
-    wb = openpyxl.load_workbook(r"apurement\mail_communes\static\RegBL_contactCommune.xlsx")
+    wb = openpyxl.load_workbook(os.getenv("FEEDBACK_COMMUNES_v2_MUNICIPALITY_FILE_RELPATH"))
     ws = wb["Communes"]
     row = 2
     mail = {}
@@ -132,6 +132,6 @@ if __name__ == "__main__":
                 send_mail(to, "RegBL - apurement des données", email_content, files=attached_files)
 
                 mail_filename = f"{row[0]}_{row[1]}_{dt}_mail.html"
-                mail_path = os.path.join(os.environ["FEEDBACK_COMMUNES_WORKING_DIR"], dt, mail_filename)
+                mail_path = os.path.join(os.getenv("FEEDBACK_COMMUNES_WORKING_DIR"), dt, mail_filename)
                 with open(mail_path, "w", encoding="utf-8") as mail_file:
                     mail_file.write(email_content)

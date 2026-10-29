@@ -78,6 +78,19 @@ def getDataFrame(path: str, json_fileName: str, excel_fileName: str, filters=[])
         # open and get actual data from whitelist
         whitelist_path = os.getenv("FEEDBACK_COMMUNES_v2_WHITELIST_FILEPATH")
         df_whitelist = pd.read_excel(whitelist_path)
+
+        # get mask of egid in whitelist that are also in actual file
+        mask = df_whitelist["EGID"].isin(df["egid"])
+        # open excelfile in write-mode to add date of last occurence
+        wb = load_workbook(whitelist_path)
+        ws = wb["Feuil1"]
+        col_idx = df_whitelist.columns.get_loc("Dernière occurrence dans fichiers erreurs RegBL") + 1
+        for row_idx in df_whitelist.index[mask]:
+            excel_row = row_idx + 2
+            # print(f">>  EGID: {ws.cell(row=excel_row, column=1).value}    row={excel_row}, column={col_idx}")
+            ws.cell(row=excel_row, column=col_idx).value = datetime.strftime(datetime.now(), "%d.%m.%y")
+        wb.save(whitelist_path)
+
         df_whitelist = df_whitelist[df_whitelist["Date sortie"].isna()]
         # filter df with data from df_whitelist
         df = df[~df["egid"].isin(df_whitelist["EGID"])]
@@ -96,7 +109,7 @@ def getDataFrame(path: str, json_fileName: str, excel_fileName: str, filters=[])
     # save to excel file
     print("export data to excel")
 
-    filepath = path / excel_fileName
+    filepath = Path(path) / excel_fileName
     df.to_excel(filepath, index=False)
 
     return filepath
